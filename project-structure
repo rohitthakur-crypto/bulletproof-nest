@@ -360,6 +360,165 @@ GET    /admin/users/analytics
 GET    /admin/users/reported
 
 
+src/
+├── bootstrap/
+│   ├── app.module.ts
+│   ├── app.factory.ts
+│   └── swagger.setup.ts
+│
+├── config/
+│   ├── app.config.ts
+│   ├── database.config.ts
+│   ├── jwt.config.ts              ← Separate secrets for user vs admin JWT
+│   ├── redis.config.ts
+│   ├── oauth.config.ts
+│   └── config.module.ts
+│
+├── core/
+│   ├── prisma/
+│   │   ├── prisma.service.ts
+│   │   └── prisma.module.ts
+│   ├── logger/
+│   │   └── logger.service.ts
+│   ├── cache/
+│   │   └── cache.service.ts
+│   └── core.module.ts
+│
+├── common/
+│   ├── decorators/
+│   │   ├── current-user.decorator.ts
+│   │   ├── current-admin.decorator.ts     ← Separate decorator
+│   │   ├── roles.decorator.ts
+│   │   ├── permissions.decorator.ts       ← For sub-admin RBAC
+│   │   └── public.decorator.ts
+│   ├── guards/
+│   │   ├── user-jwt.guard.ts              ← Guards users only
+│   │   ├── admin-jwt.guard.ts             ← Guards admins only
+│   │   ├── permissions.guard.ts           ← Sub-admin permission check
+│   │   └── roles.guard.ts
+│   ├── filters/
+│   │   └── http-exception.filter.ts
+│   ├── interceptors/
+│   │   └── transform.interceptor.ts
+│   ├── pipes/
+│   │   └── zod-validation.pipe.ts
+│   └── types/
+│       ├── user-jwt-payload.type.ts
+│       ├── admin-jwt-payload.type.ts      ← Has permissions[] in payload
+│       └── api-response.type.ts
+│
+├── infra/
+│   ├── queue/
+│   ├── email/
+│   └── sms/
+│
+└── modules/
+    │
+    ├── user-auth/                         ← ONLY user authentication
+    │   ├── controllers/
+    │   │   ├── user-auth.controller.ts
+    │   │   ├── user-oauth.controller.ts
+    │   │   └── user-token.controller.ts
+    │   ├── dto/
+    │   │   ├── email-login.dto.ts
+    │   │   ├── phone-login.dto.ts
+    │   │   ├── register.dto.ts
+    │   │   ├── verify-otp.dto.ts
+    │   │   ├── refresh-token.dto.ts
+    │   │   ├── forgot-password.dto.ts
+    │   │   └── reset-password.dto.ts
+    │   ├── interfaces/
+    │   │   └── user-auth-tokens.interface.ts
+    │   ├── repositories/
+    │   │   ├── user-refresh-token.repository.ts
+    │   │   ├── user-session.repository.ts
+    │   │   ├── user-otp.repository.ts
+    │   │   ├── user-oauth-account.repository.ts
+    │   │   └── user-password-reset.repository.ts
+    │   ├── services/
+    │   │   ├── user-auth.service.ts
+    │   │   ├── user-token.service.ts
+    │   │   ├── user-session.service.ts
+    │   │   ├── user-otp.service.ts
+    │   │   ├── user-password.service.ts
+    │   │   ├── user-oauth.service.ts
+    │   │   └── providers/
+    │   │       ├── google.strategy.ts
+    │   │       └── apple.strategy.ts
+    │   ├── strategies/
+    │   │   ├── user-jwt.strategy.ts
+    │   │   ├── user-jwt-refresh.strategy.ts
+    │   │   └── user-local.strategy.ts
+    │   └── user-auth.module.ts
+    │
+    ├── admin-auth/                        ← ONLY admin/sub-admin authentication
+    │   ├── controllers/
+    │   │   └── admin-auth.controller.ts
+    │   ├── dto/
+    │   │   ├── admin-login.dto.ts
+    │   │   ├── admin-refresh-token.dto.ts
+    │   │   └── admin-change-password.dto.ts
+    │   ├── interfaces/
+    │   │   └── admin-auth-tokens.interface.ts
+    │   ├── repositories/
+    │   │   ├── admin-refresh-token.repository.ts
+    │   │   └── admin-session.repository.ts
+    │   ├── services/
+    │   │   ├── admin-auth.service.ts
+    │   │   ├── admin-token.service.ts
+    │   │   └── admin-session.service.ts
+    │   ├── strategies/
+    │   │   ├── admin-jwt.strategy.ts
+    │   │   └── admin-jwt-refresh.strategy.ts
+    │   └── admin-auth.module.ts
+    │
+    ├── users/                             ← User domain (profile, prefs, search)
+    │   ├── controllers/
+    │   │   ├── users.controller.ts
+    │   │   └── user-profile.controller.ts
+    │   ├── dto/
+    │   │   ├── update-profile.dto.ts
+    │   │   ├── update-preferences.dto.ts
+    │   │   └── user-search.dto.ts
+    │   ├── interfaces/
+    │   │   └── user-for-auth.interface.ts ← IUserAuthService contract
+    │   ├── repositories/
+    │   │   ├── user.repository.ts
+    │   │   └── user-profile.repository.ts
+    │   ├── services/
+    │   │   ├── users.service.ts           ← Implements IUserAuthService
+    │   │   ├── user-profile.service.ts
+    │   │   └── user-search.service.ts
+    │   └── users.module.ts
+    │
+    ├── admins/                            ← Admin domain (management, RBAC)
+    │   ├── controllers/
+    │   │   ├── admins.controller.ts       ← Super admin: manage sub-admins
+    │   │   └── admin-users.controller.ts  ← Manage app users
+    │   ├── dto/
+    │   │   ├── create-sub-admin.dto.ts
+    │   │   ├── update-sub-admin.dto.ts
+    │   │   ├── assign-permissions.dto.ts
+    │   │   └── toggle-admin-status.dto.ts
+    │   ├── interfaces/
+    │   │   └── admin-for-auth.interface.ts ← IAdminAuthService contract
+    │   ├── repositories/
+    │   │   └── admin.repository.ts        ← admins table owner
+    │   ├── services/
+    │   │   ├── admins.service.ts          ← Implements IAdminAuthService
+    │   │   └── admin-management.service.ts ← Sub-admin CRUD
+    │   └── admins.module.ts
+    │
+    └── permissions/                       ← Standalone RBAC module
+        ├── constants/
+        │   └── permissions.constants.ts   ← All permission enums
+        ├── repositories/
+        │   └── permission.repository.ts
+        ├── services/
+        │   └── permissions.service.ts
+        └── permissions.module.ts
+
+
 FINAL RECOMMENDED DEVELOPMENT FLOW: DAILY FLOW
 
 1. pnpm start:dev
