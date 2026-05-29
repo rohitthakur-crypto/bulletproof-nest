@@ -1,0 +1,10 @@
+export { configureApplication } from './application.bootstrap';
+export { setupApp } from './app.bootstrap';
+export { setupFastify } from './fastify.bootstrap';
+export { setupFilters } from './filter.bootstrap';
+export { setupGuards } from './guard.bootstrap';
+export { setupInterceptors } from './interceptor.bootstrap';
+export { setupLogger } from './logger.bootstrap';
+export { setupMiddlewares } from './middleware.bootstrap';
+export { setupSwagger } from './swagger.bootstrap';
+export { setupValidation } from './validation.bootstrap';

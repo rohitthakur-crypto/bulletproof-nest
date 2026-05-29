@@ -1,0 +1,762 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+//////////////////////////////////////////////////////
+//////////////////// ENUMS ///////////////////////////
+//////////////////////////////////////////////////////
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  APPLE
+  META
+}
+
+enum OtpType {
+  EMAIL_VERIFICATION
+  LOGIN
+  PASSWORD_RESET
+}
+
+enum SessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum WorkspaceMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP
+  TELEGRAM
+  TIKTOK
+  WEBCHAT
+}
+
+enum SocialAccountStatus {
+  ACTIVE
+  DISCONNECTED
+  EXPIRED
+  REVOKED
+}
+
+enum AutomationStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum AutomationTriggerType {
+  COMMENT_KEYWORD
+  DM_KEYWORD
+  STORY_MENTION
+  WEBHOOK
+  MANUAL
+}
+
+enum ConversationStatus {
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+  TEMPLATE
+}
+
+//////////////////////////////////////////////////////
+//////////////////// USERS ///////////////////////////
+//////////////////////////////////////////////////////
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+
+  name            String
+
+  email           String   @unique
+
+  passwordHash    String?
+
+  avatar          String?
+
+  isEmailVerified Boolean  @default(false)
+
+  lastLoginAt     DateTime?
+
+  createdAt       DateTime @default(now())
+
+  updatedAt       DateTime @updatedAt
+
+  authProviders     AuthProviderAccount[]
+
+  memberships     WorkspaceMember[]
+
+  createdAutomations Automation[] @relation("AutomationCreatedBy")
+
+  @@index([email])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// USER SESSIONS ///////////////////
+//////////////////////////////////////////////////////
+
+model UserSession {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  userId            String   @db.Uuid
+
+  refreshTokenHash  String
+
+  userAgent         String?
+
+  ipAddress         String?
+
+  deviceName        String?
+
+  status            SessionStatus @default(ACTIVE)
+
+  expiresAt         DateTime
+
+  lastUsedAt        DateTime?
+
+  revokedAt         DateTime?
+
+  createdAt         DateTime @default(now())
+
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+
+  @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// USER OTP CODES ///////////////////
+//////////////////////////////////////////////////////
+
+model UserOtpCode {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  userId            String?  @db.Uuid
+
+  email             String
+
+  code              String
+
+  type              OtpType
+
+  expiresAt         DateTime
+
+  verifiedAt        DateTime?
+
+  createdAt         DateTime @default(now())
+
+  user              User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+
+  @@index([type])
+
+  @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// USER PASSWORD RESET TOKENS //////
+//////////////////////////////////////////////////////
+
+model UserPasswordResetToken {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  userId            String   @db.Uuid
+
+  tokenHash         String
+
+  expiresAt         DateTime
+
+  usedAt            DateTime?
+
+  createdAt         DateTime @default(now())
+
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+
+  @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// USER AUTH PROVIDER ACCOUNTS ////
+//////////////////////////////////////////////////////
+
+model UserAuthProviderAccount {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  userId                String   @db.Uuid
+
+  provider              AuthProvider
+
+  providerId            String
+
+  accessToken           String?
+
+  refreshToken          String?
+
+  tokenExpiresAt        DateTime?
+
+  scope                 String?
+
+  idToken               String?
+
+  createdAt             DateTime @default(now())
+
+  updatedAt             DateTime @updatedAt
+
+  user                  User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+
+  @@index([provider])
+
+  @@unique([provider, providerId])
+}
+
+
+//////////////////////////////////////////////////////
+//////////////// ADMINS ///////////////////////////////
+//////////////////////////////////////////////////////
+
+model Admin {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  name              String
+
+  email             String   @unique
+
+  passwordHash      String
+
+  avatar            String?
+
+  isActive          Boolean  @default(true)
+
+  lastLoginAt       DateTime?
+
+  createdAt         DateTime @default(now())
+
+  updatedAt         DateTime @updatedAt
+
+  roles             AdminRoleAssignment[]
+
+  sessions          AdminSession[]
+
+  @@index([email])
+}
+
+//////////////////////////////////////////////////////
+//////////////// ADMIN ROLES ////////////////////////
+//////////////////////////////////////////////////////
+
+model AdminRole {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  name              String   @unique
+
+  description       String?
+
+  isSystem          Boolean  @default(false)
+
+  createdAt         DateTime @default(now())
+
+  updatedAt         DateTime @updatedAt
+
+  permissions       AdminRolePermission[]
+
+  admins            AdminRoleAssignment[]
+}
+
+//////////////////////////////////////////////////////
+//////////////// ADMIN PERMISSIONS ///////////////////
+//////////////////////////////////////////////////////
+
+model AdminPermission {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  key               String   @unique
+
+  description       String?
+
+  createdAt         DateTime @default(now())
+
+  updatedAt         DateTime @updatedAt
+
+  roles             AdminRolePermission[]
+}
+
+//////////////////////////////////////////////////////
+//////////////// ADMIN ROLE PERMISSIONS /////////////
+//////////////////////////////////////////////////////
+
+model AdminRolePermission {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  roleId            String   @db.Uuid
+
+  permissionId      String   @db.Uuid
+
+  role              AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  permission        AdminPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+//////////////////////////////////////////////////////
+//////////////// ADMIN ROLE ASSIGNMENTS //////////////
+//////////////////////////////////////////////////////
+
+model AdminRoleAssignment {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  adminId           String   @db.Uuid
+
+  roleId            String   @db.Uuid
+
+  assignedAt        DateTime @default(now())
+
+  admin             Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  role              AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([adminId, roleId])
+}
+
+//////////////////////////////////////////////////////
+//////////////// ADMIN SESSIONS //////////////////////
+//////////////////////////////////////////////////////
+
+model AdminSession {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  adminId           String   @db.Uuid
+
+  refreshTokenHash  String
+
+  ipAddress         String?
+
+  userAgent         String?
+
+  expiresAt         DateTime
+
+  revokedAt         DateTime?
+
+  createdAt         DateTime @default(now())
+
+  admin             Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+}
+
+//////////////////////////////////////////////////////
+//////////////// ADMIN PASSWORD RESET TOKENS ////////
+//////////////////////////////////////////////////////
+
+model AdminPasswordResetToken {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  adminId           String   @db.Uuid
+
+  tokenHash         String
+
+  expiresAt         DateTime
+
+  usedAt            DateTime?
+
+  createdAt         DateTime @default(now())
+
+  admin             Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+
+  @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// WORKSPACES //////////////////////
+//////////////////////////////////////////////////////
+
+model Workspace {
+  id              String   @id @default(uuid()) @db.Uuid
+
+  name            String
+
+  slug            String   @unique
+
+  logo            String?
+
+  plan            String? // free/pro/enterprise
+
+  timezone        String?
+
+  createdAt       DateTime @default(now())
+
+  updatedAt       DateTime @updatedAt
+
+  members         WorkspaceMember[]
+
+  socialAccounts  SocialAccount[]
+
+  automations     Automation[]
+
+  contacts        Contact[]
+
+  conversations   Conversation[]
+
+  messages        Message[]
+
+  webhookEvents   WebhookEvent[]
+}
+
+//////////////////////////////////////////////////////
+//////////////// WORKSPACE MEMBERS ///////////////////
+//////////////////////////////////////////////////////
+
+model WorkspaceMember {
+  id              String   @id @default(uuid()) @db.Uuid
+
+  workspaceId     String   @db.Uuid
+
+  userId          String   @db.Uuid
+
+  role            WorkspaceMemberRole @default(MEMBER)
+
+  createdAt       DateTime @default(now())
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+
+  @@index([workspaceId])
+
+  @@index([userId])
+}
+
+//////////////////////////////////////////////////////
+//////////////// SOCIAL ACCOUNTS /////////////////////
+//////////////////////////////////////////////////////
+
+model SocialAccount {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  workspaceId           String   @db.Uuid
+
+  platform              SocialPlatform
+
+  status                SocialAccountStatus @default(ACTIVE)
+
+  accountName           String
+
+  externalAccountId     String
+
+  username              String?
+
+  profilePicture        String?
+
+  accessToken           String
+
+  refreshToken          String?
+
+  tokenExpiresAt        DateTime?
+
+  metaPageId            String?
+
+  metadata              Json?
+
+  connectedAt           DateTime @default(now())
+
+  lastSyncedAt          DateTime?
+
+  createdAt             DateTime @default(now())
+
+  updatedAt             DateTime @updatedAt
+
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  automations           Automation[]
+
+  contacts              Contact[]
+
+  conversations         Conversation[]
+
+  messages              Message[]
+
+  @@index([workspaceId])
+
+  @@index([platform])
+
+  @@index([externalAccountId])
+
+  @@unique([platform, externalAccountId])
+}
+
+//////////////////////////////////////////////////////
+//////////////// AUTOMATIONS /////////////////////////
+//////////////////////////////////////////////////////
+
+model Automation {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  workspaceId           String   @db.Uuid
+
+  socialAccountId       String   @db.Uuid
+
+  createdById           String   @db.Uuid
+
+  name                  String
+
+  description           String?
+
+  status                AutomationStatus @default(DRAFT)
+
+  triggerType           AutomationTriggerType
+
+  triggerConfig         Json
+
+  flowData              Json?
+
+  isAiEnabled           Boolean @default(false)
+
+  publishedAt           DateTime?
+
+  createdAt             DateTime @default(now())
+
+  updatedAt             DateTime @updatedAt
+
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  socialAccount         SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  createdBy             User @relation("AutomationCreatedBy", fields: [createdById], references: [id])
+
+  logs                  AutomationExecution[]
+
+  @@index([workspaceId])
+
+  @@index([socialAccountId])
+
+  @@index([status])
+}
+
+//////////////////////////////////////////////////////
+//////////// AUTOMATION EXECUTIONS ///////////////////
+//////////////////////////////////////////////////////
+
+model AutomationExecution {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  workspaceId           String   @db.Uuid
+
+  automationId          String   @db.Uuid
+
+  triggerPayload        Json?
+
+  status                String
+
+  error                 String?
+
+  executedAt            DateTime @default(now())
+
+  automation            Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+
+  @@index([automationId])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// CONTACTS ////////////////////////
+//////////////////////////////////////////////////////
+
+model Contact {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  workspaceId           String   @db.Uuid
+
+  socialAccountId       String   @db.Uuid
+
+  externalContactId     String
+
+  username              String?
+
+  name                  String?
+
+  profilePicture        String?
+
+  metadata              Json?
+
+  tags                  String[]
+
+  lastInteractionAt     DateTime?
+
+  createdAt             DateTime @default(now())
+
+  updatedAt             DateTime @updatedAt
+
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  socialAccount         SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  conversations         Conversation[]
+
+  messages              Message[]
+
+  @@index([workspaceId])
+
+  @@index([socialAccountId])
+
+  @@index([externalContactId])
+}
+
+//////////////////////////////////////////////////////
+//////////////// CONVERSATIONS ///////////////////////
+//////////////////////////////////////////////////////
+
+model Conversation {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  workspaceId           String   @db.Uuid
+
+  socialAccountId       String   @db.Uuid
+
+  contactId             String   @db.Uuid
+
+  status                ConversationStatus @default(OPEN)
+
+  lastMessageAt         DateTime?
+
+  createdAt             DateTime @default(now())
+
+  updatedAt             DateTime @updatedAt
+
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  socialAccount         SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  contact               Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  messages              Message[]
+
+  @@index([workspaceId])
+
+  @@index([socialAccountId])
+
+  @@index([contactId])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// MESSAGES ////////////////////////
+//////////////////////////////////////////////////////
+
+model Message {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  workspaceId           String   @db.Uuid
+
+  socialAccountId       String   @db.Uuid
+
+  conversationId        String   @db.Uuid
+
+  contactId             String   @db.Uuid
+
+  externalMessageId     String?
+
+  direction             MessageDirection
+
+  type                  MessageType
+
+  content               String?
+
+  attachments           Json?
+
+  metadata              Json?
+
+  sentAt                DateTime?
+
+  deliveredAt           DateTime?
+
+  readAt                DateTime?
+
+  createdAt             DateTime @default(now())
+
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  socialAccount         SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  conversation          Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  contact               Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+
+  @@index([conversationId])
+
+  @@index([contactId])
+
+  @@index([externalMessageId])
+}
+
+//////////////////////////////////////////////////////
+//////////////// WEBHOOK EVENTS //////////////////////
+//////////////////////////////////////////////////////
+
+model WebhookEvent {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  workspaceId           String?  @db.Uuid
+
+  platform              SocialPlatform
+
+  eventType             String
+
+  externalEventId       String?
+
+  payload               Json
+
+  processed             Boolean @default(false)
+
+  processedAt           DateTime?
+
+  createdAt             DateTime @default(now())
+
+  workspace             Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+
+  @@index([platform])
+
+  @@index([processed])
+}

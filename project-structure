@@ -1,0 +1,379 @@
+src/
+
+├── main.ts
+├── app.module.ts
+
+├── bootstrap/
+│   ├── app.bootstrap.ts
+│   ├── swagger.bootstrap.ts
+│   ├── security.bootstrap.ts
+│   ├── validation.bootstrap.ts
+│   └── logger.bootstrap.ts
+
+├── config/
+│   ├── app.config.ts
+│   ├── auth.config.ts
+│   ├── database.config.ts
+│   ├── redis.config.ts
+│   ├── firebase.config.ts
+│   ├── queue.config.ts
+│   ├── env.validation.ts
+│   └── configuration.module.ts
+
+├── core/
+│   ├── database/
+│   ├── cache/
+│   ├── queue/
+│   ├── logger/
+│   ├── auth/
+│   ├── health/
+│   ├── events/
+│   └── transactions/
+
+├── infra/
+│   ├── prisma/
+│   ├── redis/
+│   ├── firebase/
+│   ├── bullmq/
+│   ├── mail/
+│   └── storage/
+
+├── common/
+│   ├── constants/
+│   ├── enums/
+│   ├── decorators/
+│   ├── guards/
+│   ├── interceptors/
+│   ├── filters/
+│   ├── middleware/
+│   ├── pipes/
+│   ├── validators/
+│   ├── exceptions/
+│   ├── interfaces/
+│   ├── types/
+│   ├── utils/
+│   └── responses/
+
+├── shared/
+│   ├── dto/
+│   ├── entities/
+│   ├── repositories/
+│   ├── services/
+│   ├── pagination/
+│   ├── auditing/
+│   └── base/
+
+├── modules/
+│
+│   ├── auth/
+│   ├── users/
+│   ├── admins/
+│   ├── notifications/
+│   ├── health/
+│   ├── audit/
+│   └── system/
+
+├── prisma/
+│   ├── schema/
+│   ├── migrations/
+│   └── seeds/
+
+├── jobs/
+│   ├── email/
+│   ├── notification/
+│   └── cleanup/
+
+├── test/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+
+└── scripts/
+
+
+modules/auth/
+
+├── controllers/
+├── services/
+├── repositories/
+├── dto/
+├── entities/
+├── guards/
+├── strategies/
+├── validators/
+├── interfaces/
+├── auth.module.ts
+└── constants/
+
+
+modules/notifications/
+
+├── controllers/
+├── services/
+├── dto/
+├── templates/
+├── jobs/
+└── notification.module.ts
+
+
+modules/health/
+
+├── controllers/
+├── services/
+└── health.module.ts
+
+users/
+  controllers/
+  services/
+  repositories/
+  dto/
+
+
+  modules/users/
+
+├── controllers/
+│   ├── users.controller.ts
+│   └── admin-users.controller.ts
+
+├── services/
+│   ├── users.service.ts
+│   ├── create-user.service.ts
+│   └── profile.service.ts
+
+├── repositories/
+│   └── users.repository.ts
+
+├── dto/
+│   ├── create-user.dto.ts
+│   ├── update-user.dto.ts
+│   └── query-users.dto.ts
+
+├── entities/
+│   └── user.entity.ts
+
+├── validators/
+├── serializers/
+├── policies/
+├── users.module.ts
+└── users.constants.ts
+
+core/
+
+├── auth/
+├── cache/
+├── database/
+├── events/
+├── health/
+├── logger/
+├── queue/
+└── transactions/
+
+
+infra/
+
+├── prisma/
+├── redis/
+├── firebase/
+├── bullmq/
+├── mail/
+└── storage/
+
+
+shared/
+
+├── base/
+├── dto/
+├── entities/
+├── repositories/
+├── services/
+├── pagination/
+└── auditing/
+
+common/
+
+├── decorators/
+├── guards/
+├── interceptors/
+├── filters/
+├── middleware/
+├── validators/
+├── constants/
+├── enums/
+└── utils/
+
+core/logger/
+
+├── logger.module.ts
+├── logger.service.ts
+├── pino.config.ts
+├── request-logger.middleware.ts
+└── correlation-id.middleware.ts
+
+core/cache/
+
+├── cache.module.ts
+├── cache.service.ts
+├── cache.interceptor.ts
+├── cache.keys.ts
+└── cache.constants.ts
+
+
+core/queue/
+
+├── queue.module.ts
+├── queue.service.ts
+├── processors/
+├── jobs/
+└── workers/
+
+email.queue
+notification.queue
+audit.queue
+cleanup.queue
+
+
+infra/firebase/
+
+├── firebase.module.ts
+├── firebase.service.ts
+├── firebase.provider.ts
+└── firebase.constants.ts
+
+
+prisma/
+
+├── schema/
+│   ├── user.prisma
+│   ├── auth.prisma
+│   ├── admin.prisma
+│   └── notification.prisma
+
+├── migrations/
+└── seeds/
+
+common/validators/
+
+├── zod-validation.pipe.ts
+└── schemas/
+
+
+modules/auth/
+
+├── controllers/
+├── services/
+├── repositories/
+├── dto/
+├── guards/
+├── strategies/
+├── decorators/
+├── validators/
+└── auth.module.ts
+
+
+common/rbac/
+
+├── decorators/
+├── guards/
+├── permissions/
+├── policies/
+└── roles/
+
+
+modules/admins/
+
+├── controllers/
+├── services/
+├── repositories/
+├── dto/
+├── entities/
+├── policies/
+└── admins.module.ts
+
+API Response Standard
+
+{
+  "success": true,
+  "message": "User fetched successfully",
+  "data": {},
+  "meta": {},
+  "timestamp": ""
+}
+
+core/auth/
+core/security/
+
+guards/
+├── jwt-auth.guard.ts
+├── refresh-token.guard.ts
+├── roles.guard.ts
+├── admin-auth.guard.ts
+
+
+strategies/
+├── jwt.strategy.ts
+├── google.strategy.ts
+├── apple.strategy.ts
+├── refresh-token.strategy.ts
+
+validators/
+├── login.validator.ts
+├── register.validator.ts
+
+export const loginSchema = z.object({
+   email: z.string().email(),
+   password: z.string().min(6)
+});
+
+POST /auth/login
+POST /auth/register
+POST /auth/refresh-token
+POST /auth/logout
+POST /auth/google
+POST /auth/apple
+POST /auth/forgot-password
+POST /auth/reset-password
+
+
+GET /users
+GET /users/:id
+PATCH /users/:id
+DELETE /users/:id
+PATCH /users/:id/status
+
+GET /me
+PATCH /me
+PATCH /me/password
+POST /me/avatar
+
+GET    /admin/users
+GET    /admin/users/:id
+
+PATCH  /admin/users/:id/status
+PATCH  /admin/users/:id/role
+
+POST   /admin/users/:id/ban
+POST   /admin/users/:id/unban
+
+DELETE /admin/users/:id
+
+GET    /admin/users/analytics
+GET    /admin/users/reported
+
+
+FINAL RECOMMENDED DEVELOPMENT FLOW: DAILY FLOW
+
+1. pnpm start:dev
+
+2. write code
+
+3. pnpm lint:fix
+
+4. pnpm typecheck
+
+5. pnpm test
+
+6. git add .
+
+7. git commit -m "feat(auth): add otp login"
+
+8. git push
