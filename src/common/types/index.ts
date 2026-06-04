@@ -3,15 +3,9 @@ export type {
   ApiErrorPayload,
   ApiErrorResponse,
   ApiResponse,
-  ApiResponseMeta,
+  ApiMeta,
   ApiSuccessResponse,
-  BuildErrorFromExceptionInput,
-  BuildErrorInput,
-  BuildSuccessInput,
-  CursorPaginationMeta,
-  OffsetPaginationMeta,
-  PaginationMeta,
-  ServiceResult,
-} from '@/common/response';
+  ValidationDetail,
+} from '@/core/api';
 
-export type { HandlerResult } from '@/common/response/normalize';
+export type { CursorPagination, OffsetPagination, PaginatedResult } from '@/core/api';

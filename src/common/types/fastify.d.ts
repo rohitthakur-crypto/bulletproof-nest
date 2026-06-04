@@ -7,6 +7,11 @@ declare module 'fastify' {
     id?: string;
     /** Pino child logger attached by nestjs-pino. */
     log?: Logger;
+    /** Set by `JwtAuthGuard` or `JwtAuthMiddleware` after Bearer token validation. */
+    user?: {
+      userId: string;
+      email?: string;
+    };
   }
 }
 

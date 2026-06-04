@@ -1,16 +1,8 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 
 import { withTransaction } from './helpers/transaction.helper';
-import {
-  createExtendedPrismaClient,
-  type ExtendedPrismaClient,
-} from './prisma.extension';
+import { createExtendedPrismaClient, type ExtendedPrismaClient } from './prisma.extension';
 import type { TransactionCallback, TransactionOptions } from './prisma.types';
 
 import { AppConfigService } from '@/config';
@@ -48,10 +40,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  withTransaction<T>(
-    fn: TransactionCallback<T>,
-    options?: TransactionOptions,
-  ): Promise<T> {
+  withTransaction<T>(fn: TransactionCallback<T>, options?: TransactionOptions): Promise<T> {
     return withTransaction(this.client, fn, options);
   }
 }

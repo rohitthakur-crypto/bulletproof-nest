@@ -1,13 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import {
-  HealthIndicatorService,
-  type HealthIndicatorResult,
-} from '@nestjs/terminus';
+import { HealthIndicatorService, type HealthIndicatorResult } from '@nestjs/terminus';
 
-import {
-  HEALTH_CHECK_TIMEOUT_MS,
-  HEALTH_SERVICE_KEYS,
-} from '../constants/health.constants';
+import { HEALTH_CHECK_TIMEOUT_MS, HEALTH_SERVICE_KEYS } from '../constants/health.constants';
 
 import { PrismaService } from '@/infra/prisma';
 
@@ -18,9 +12,7 @@ export class PrismaHealthIndicator {
     private readonly healthIndicatorService: HealthIndicatorService,
   ) {}
 
-  async isHealthy(
-    key = HEALTH_SERVICE_KEYS.DATABASE,
-  ): Promise<HealthIndicatorResult> {
+  async isHealthy(key = HEALTH_SERVICE_KEYS.DATABASE): Promise<HealthIndicatorResult> {
     const startedAt = Date.now();
 
     try {

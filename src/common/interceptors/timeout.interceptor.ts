@@ -8,10 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { catchError, throwError, timeout, TimeoutError } from 'rxjs';
 
-import {
-  REQUEST_TIMEOUT_MS_KEY,
-  SKIP_REQUEST_TIMEOUT_KEY,
-} from '@/common/decorators';
+import { REQUEST_TIMEOUT_MS_KEY, SKIP_REQUEST_TIMEOUT_KEY } from '@/common/decorators';
 import { AppConfigService } from '@/config';
 
 @Injectable()
@@ -26,19 +23,19 @@ export class TimeoutInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const skipTimeout = this.reflector.getAllAndOverride<boolean>(
-      SKIP_REQUEST_TIMEOUT_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const skipTimeout = this.reflector.getAllAndOverride<boolean>(SKIP_REQUEST_TIMEOUT_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (skipTimeout) {
       return next.handle();
     }
 
-    const routeTimeoutMs = this.reflector.getAllAndOverride<number>(
-      REQUEST_TIMEOUT_MS_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const routeTimeoutMs = this.reflector.getAllAndOverride<number>(REQUEST_TIMEOUT_MS_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     const timeoutMs = routeTimeoutMs ?? this.config.app.requestTimeoutMs;
 
@@ -48,10 +45,7 @@ export class TimeoutInterceptor implements NestInterceptor {
       catchError((error: unknown) => {
         if (error instanceof TimeoutError) {
           return throwError(
-            () =>
-              new RequestTimeoutException(
-                `Request timed out after ${timeoutMs}ms`,
-              ),
+            () => new RequestTimeoutException(`Request timed out after ${timeoutMs}ms`),
           );
         }
 

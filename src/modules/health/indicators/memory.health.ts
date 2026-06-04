@@ -1,10 +1,7 @@
 import os from 'node:os';
 
 import { Injectable } from '@nestjs/common';
-import {
-  HealthIndicatorService,
-  type HealthIndicatorResult,
-} from '@nestjs/terminus';
+import { HealthIndicatorService, type HealthIndicatorResult } from '@nestjs/terminus';
 
 import {
   HEALTH_SERVICE_KEYS,
@@ -14,9 +11,7 @@ import {
 
 @Injectable()
 export class MemoryHealthIndicator {
-  constructor(
-    private readonly healthIndicatorService: HealthIndicatorService,
-  ) {}
+  constructor(private readonly healthIndicatorService: HealthIndicatorService) {}
 
   isHealthy(key = HEALTH_SERVICE_KEYS.MEMORY): Promise<HealthIndicatorResult> {
     const memory = process.memoryUsage();
@@ -37,9 +32,7 @@ export class MemoryHealthIndicator {
     };
 
     if (!isHealthy) {
-      return Promise.resolve(
-        this.healthIndicatorService.check(key).down(details),
-      );
+      return Promise.resolve(this.healthIndicatorService.check(key).down(details));
     }
 
     return Promise.resolve(this.healthIndicatorService.check(key).up(details));

@@ -28,9 +28,7 @@ import { AppConfigService } from '@/config';
  * 8. Guards     — global auth / role guards (when added)
  * 9. Swagger    — OpenAPI docs
  */
-export async function configureApplication(
-  app: INestApplication,
-): Promise<void> {
+export async function configureApplication(app: INestApplication): Promise<void> {
   const config = app.get(AppConfigService);
 
   setupApp(app);

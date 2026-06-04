@@ -10,9 +10,5 @@ export type TransactionCallback<T> = (tx: TransactionClient) => Promise<T>;
 export interface TransactionOptions {
   maxWait?: number;
   timeout?: number;
-  isolationLevel?:
-    | 'ReadUncommitted'
-    | 'ReadCommitted'
-    | 'RepeatableRead'
-    | 'Serializable';
+  isolationLevel?: 'ReadUncommitted' | 'ReadCommitted' | 'RepeatableRead' | 'Serializable';
 }

@@ -6,9 +6,7 @@ export interface RequestContext {
   path: string;
 }
 
-export function getRequestContextFromExecution(
-  context: ExecutionContext,
-): RequestContext {
+export function getRequestContextFromExecution(context: ExecutionContext): RequestContext {
   const request = context.switchToHttp().getRequest<FastifyRequest>();
 
   return getRequestContextFromRequest(request);
@@ -20,9 +18,7 @@ export function getRequestContextFromHost(host: ArgumentsHost): RequestContext {
   return getRequestContextFromRequest(request);
 }
 
-export function getRequestContextFromRequest(
-  request: FastifyRequest,
-): RequestContext {
+export function getRequestContextFromRequest(request: FastifyRequest): RequestContext {
   const rawUrl = request.url ?? '/';
   const path = rawUrl.split('?')[0] ?? '/';
 
@@ -32,10 +28,7 @@ export function getRequestContextFromRequest(
   };
 }
 
-export function resolveHttpStatusFromContext(
-  context: ExecutionContext,
-  fallback = 200,
-): number {
+export function resolveHttpStatusFromContext(context: ExecutionContext, fallback = 200): number {
   const response = context.switchToHttp().getResponse<FastifyReply>();
   const statusCode = response.statusCode ?? fallback;
 

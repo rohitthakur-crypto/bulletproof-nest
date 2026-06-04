@@ -18,9 +18,7 @@ export class DiskHealthIndicator {
     private readonly healthIndicatorService: HealthIndicatorService,
   ) {}
 
-  async isHealthy(
-    key = HEALTH_SERVICE_KEYS.DISK,
-  ): Promise<HealthIndicatorResult> {
+  async isHealthy(key = HEALTH_SERVICE_KEYS.DISK): Promise<HealthIndicatorResult> {
     try {
       // Terminus expects minimum free percentage (e.g. 10 = at least 10% free).
       return await this.terminusDiskHealth.checkStorage(key, {

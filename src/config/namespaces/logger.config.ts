@@ -5,10 +5,7 @@ import { env } from '../validation/validate-env';
 import { Environment } from '@/common/enums';
 import { LogLevel } from '@/core/logger/enums';
 
-const DEV_ENVIRONMENTS = new Set<Environment>([
-  Environment.Development,
-  Environment.Local,
-]);
+const DEV_ENVIRONMENTS = new Set<Environment>([Environment.Development, Environment.Local]);
 
 export const loggerConfig = registerAs('logger', () => {
   const e = env();

@@ -1,4 +1,5 @@
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
+import { Logger } from 'nestjs-pino';
 
 /**
  * NestJS route middleware is registered in AppModule.configure().

@@ -43,10 +43,7 @@ export function shouldExcludeHttpLog(url: string | undefined): boolean {
   return path === '/health' || path.startsWith('/health/');
 }
 
-export function resolveHttpLogLevel(
-  statusCode: number,
-  hasError = false,
-): LogLevel {
+export function resolveHttpLogLevel(statusCode: number, hasError = false): LogLevel {
   if (hasError || statusCode >= 500) {
     return LogLevel.Error;
   }
@@ -59,22 +56,22 @@ export function resolveHttpLogLevel(
 }
 
 export function buildHttpAccessLog(input: {
-  req: FastifyRequest;
+  req: FastifyRequest | import('node:http').IncomingMessage;
+  incoming: import('node:http').IncomingMessage;
   res: ServerResponse;
   durationMs: number;
+  requestId: string;
 }): HttpAccessLogPayload {
-  const { req, res, durationMs } = input;
-
-  const requestId = String(req.id ?? 'unknown');
+  const { req, incoming, res, durationMs, requestId } = input;
 
   return {
     requestId,
     correlationId: requestId,
-    method: req.method,
-    url: resolveRequestUrl(req.raw),
+    method: req.method ?? incoming.method ?? 'UNKNOWN',
+    url: resolveRequestUrl(incoming),
     statusCode: res.statusCode,
     durationMs,
-    ip: resolveClientIp(req.raw),
+    ip: resolveClientIp(incoming),
     userAgent: req.headers['user-agent'],
   };
 }

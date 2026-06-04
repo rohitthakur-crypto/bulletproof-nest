@@ -536,3 +536,5 @@ FINAL RECOMMENDED DEVELOPMENT FLOW: DAILY FLOW
 7. git commit -m "feat(auth): add otp login"
 
 8. git push
+
+; i want a code of user repostory user service and user cache want better stcrured enterprse code wasy o scale production rady acrchure

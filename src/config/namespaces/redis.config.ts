@@ -4,7 +4,6 @@ import { env } from '../validation/validate-env';
 
 export const redisConfig = registerAs('redis', () => {
   const e = env();
-
   return {
     host: e.REDIS_HOST,
 

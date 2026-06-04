@@ -1,2 +1,3 @@
-export { ErrorCode, LegacyErrorCode } from './error-codes.constants';
-export type { ErrorCode as ErrorCodeType } from './error-codes.constants';
+/** @deprecated Import from `@/core/api` instead. */
+export { ErrorCode } from '@/core/api';
+export type { ErrorCodeType } from '@/core/api';

@@ -1,8 +1,11 @@
+import type { IncomingMessage } from 'node:http';
+import type { ServerResponse } from 'node:http';
 import { performance } from 'node:perf_hooks';
 
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import { resolveIncomingMessage, resolveRequestId, resolveServerResponse } from '@/common/utils';
 import { AppConfigService } from '@/config';
 import {
   LogLevel,
@@ -22,13 +25,19 @@ import {
 export class RequestLoggerMiddleware implements NestMiddleware {
   constructor(private readonly config: AppConfigService) {}
 
-  use(req: FastifyRequest, res: FastifyReply, next: () => void): void {
+  use(
+    req: FastifyRequest | IncomingMessage,
+    res: FastifyReply | ServerResponse,
+    next: () => void,
+  ): void {
     if (!this.config.logger.autoLogging) {
       next();
       return;
     }
 
     const startedAt = performance.now();
+    const serverResponse = resolveServerResponse(res);
+    const incoming = resolveIncomingMessage(req);
 
     let logged = false;
 
@@ -39,18 +48,26 @@ export class RequestLoggerMiddleware implements NestMiddleware {
 
       logged = true;
 
-      if (shouldExcludeHttpLog(req.url)) {
+      const url = incoming.url ?? '/';
+
+      if (shouldExcludeHttpLog(url)) {
         return;
       }
 
-      const log = req.log;
+      const log = 'log' in req ? req.log : undefined;
 
       if (!log) {
         return;
       }
 
       const durationMs = Math.round(performance.now() - startedAt);
-      const payload = buildHttpAccessLog({ req, res: res.raw, durationMs });
+      const payload = buildHttpAccessLog({
+        req,
+        incoming,
+        res: serverResponse,
+        durationMs,
+        requestId: resolveRequestId(req),
+      });
       const level = resolveHttpLogLevel(payload.statusCode, hasError);
       const message = formatHttpAccessMessage(payload);
 
@@ -69,9 +86,9 @@ export class RequestLoggerMiddleware implements NestMiddleware {
       }
     };
 
-    res.raw.on('finish', () => writeAccessLog(false));
-    res.raw.on('close', () => {
-      if (!res.raw.writableFinished) {
+    serverResponse.on('finish', () => writeAccessLog(false));
+    serverResponse.on('close', () => {
+      if (!serverResponse.writableFinished) {
         writeAccessLog(true);
       }
     });

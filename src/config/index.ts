@@ -8,7 +8,12 @@ export type { AppConfig } from './namespaces/app.config';
 
 export type { DatabaseConfig } from './namespaces/database.config';
 
-export type { AuthConfig } from './namespaces/auth.config';
+export type {
+  JwtConfig,
+  JwtKeyPairConfig,
+  UserJwtConfig,
+  AdminJwtConfig,
+} from './namespaces/jwt.config';
 
 export type { FirebaseConfig } from './namespaces/firebase.config';
 

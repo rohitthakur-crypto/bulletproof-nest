@@ -1,1 +1,1 @@
-export { GlobalExceptionFilter } from './global-exception.filter';
+export { ApiExceptionFilter } from '@/core/api';

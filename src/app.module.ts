@@ -1,20 +1,26 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 
 import { TimeoutInterceptor } from '@/common/interceptors';
 import { RequestLoggerMiddleware } from '@/common/middleware';
 import { AppConfigModule } from '@/config/config.module';
+import { CacheModule } from '@/core/cache';
 import { AppLoggerModule } from '@/core/logger';
 import { LOG_EXCLUDED_ROUTES } from '@/core/logger/logger.constants';
 import { PrismaModule } from '@/infra/prisma';
 import { HealthModule } from '@/modules/health';
+import { UserAuthModule } from '@/modules/user-auth';
+import { UsersModule } from '@/modules/users';
 
 @Module({
-  imports: [AppConfigModule, AppLoggerModule, PrismaModule, HealthModule],
+  imports: [
+    AppConfigModule,
+    AppLoggerModule,
+    PrismaModule,
+    CacheModule,
+    HealthModule,
+    UserAuthModule,
+    UsersModule,
+  ],
   providers: [RequestLoggerMiddleware, TimeoutInterceptor],
   controllers: [],
 })

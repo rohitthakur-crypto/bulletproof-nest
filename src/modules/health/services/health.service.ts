@@ -1,8 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import {
-  HealthCheckService,
-  type HealthIndicatorResult,
-} from '@nestjs/terminus';
+import { HealthCheckService, type HealthIndicatorResult } from '@nestjs/terminus';
 
 import { HEALTH_SERVICE_KEYS } from '../constants/health.constants';
 import { DiskHealthIndicator } from '../indicators/disk.health';
@@ -18,7 +15,10 @@ import type {
   LivenessData,
 } from '../interfaces/health.interface';
 
-import type { ServiceResult } from '@/common/response';
+export interface ServiceResult<T> {
+  data: T;
+  httpStatus: number;
+}
 import { AppLoggerService, type IAppLogger } from '@/core/logger';
 
 @Injectable()
@@ -45,21 +45,16 @@ export class HealthService {
   async getReady(): Promise<{ data: ReadinessData; httpStatus: number }> {
     const startedAt = Date.now();
 
-    const database = await this.probeIndicator(
-      HEALTH_SERVICE_KEYS.DATABASE,
-      () => this.prismaHealth.isHealthy(),
+    const database = await this.probeIndicator(HEALTH_SERVICE_KEYS.DATABASE, () =>
+      this.prismaHealth.isHealthy(),
     );
 
     const redis = this.redisHealth.isConfigured()
-      ? await this.probeIndicator(HEALTH_SERVICE_KEYS.REDIS, () =>
-          this.redisHealth.isHealthy(),
-        )
+      ? await this.probeIndicator(HEALTH_SERVICE_KEYS.REDIS, () => this.redisHealth.isHealthy())
       : ('skipped' as const);
 
     const queue = this.queueHealth.isConfigured()
-      ? await this.probeIndicator(HEALTH_SERVICE_KEYS.QUEUE, () =>
-          this.queueHealth.isHealthy(),
-        )
+      ? await this.probeIndicator(HEALTH_SERVICE_KEYS.QUEUE, () => this.queueHealth.isHealthy())
       : ('skipped' as const);
 
     const isReady =
@@ -89,9 +84,7 @@ export class HealthService {
     const startedAt = Date.now();
 
     const [database, redis, queue, memory, disk] = await Promise.all([
-      this.probeIndicator(HEALTH_SERVICE_KEYS.DATABASE, () =>
-        this.prismaHealth.isHealthy(),
-      ),
+      this.probeIndicator(HEALTH_SERVICE_KEYS.DATABASE, () => this.prismaHealth.isHealthy()),
 
       this.probeSkippedOrActive(
         HEALTH_SERVICE_KEYS.REDIS,
@@ -105,13 +98,9 @@ export class HealthService {
         () => this.queueHealth.isHealthy(),
       ),
 
-      this.probeIndicator(HEALTH_SERVICE_KEYS.MEMORY, () =>
-        this.memoryHealth.isHealthy(),
-      ),
+      this.probeIndicator(HEALTH_SERVICE_KEYS.MEMORY, () => this.memoryHealth.isHealthy()),
 
-      this.probeIndicator(HEALTH_SERVICE_KEYS.DISK, () =>
-        this.diskHealth.isHealthy(),
-      ),
+      this.probeIndicator(HEALTH_SERVICE_KEYS.DISK, () => this.diskHealth.isHealthy()),
     ]);
 
     const services = { database, redis, queue, memory, disk };
@@ -132,9 +121,7 @@ export class HealthService {
         services,
       },
       httpStatus:
-        overallStatus === 'error'
-          ? Number(HttpStatus.SERVICE_UNAVAILABLE)
-          : Number(HttpStatus.OK),
+        overallStatus === 'error' ? Number(HttpStatus.SERVICE_UNAVAILABLE) : Number(HttpStatus.OK),
     };
   }
 
@@ -191,13 +178,8 @@ export class HealthService {
     return this.probeIndicator(key, check);
   }
 
-  private extractServiceStatus(
-    result: HealthIndicatorResult,
-    key: string,
-  ): HealthServiceStatus {
-    const entry = result[key] as
-      | { status: string; [key: string]: unknown }
-      | undefined;
+  private extractServiceStatus(result: HealthIndicatorResult, key: string): HealthServiceStatus {
+    const entry = result[key] as { status: string; [key: string]: unknown } | undefined;
 
     if (!entry) {
       return 'down';
@@ -221,9 +203,7 @@ export class HealthService {
       return 'error';
     }
 
-    const activeChecks = Object.values(services).filter(
-      (status) => status !== 'skipped',
-    );
+    const activeChecks = Object.values(services).filter((status) => status !== 'skipped');
 
     if (activeChecks.some((status) => status === 'down')) {
       return 'degraded';

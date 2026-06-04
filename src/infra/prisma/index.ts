@@ -14,17 +14,10 @@ export {
   toPrismaOffset,
 } from './helpers/pagination.helper';
 
-export type {
-  OffsetPaginationInput,
-  PrismaOffsetArgs,
-} from './helpers/pagination.helper';
+export type { OffsetPaginationInput, PrismaOffsetArgs } from './helpers/pagination.helper';
 
 export { withTransaction } from './helpers/transaction.helper';
 
 export type { ExtendedPrismaClient } from './prisma.extension';
 
-export type {
-  TransactionCallback,
-  TransactionClient,
-  TransactionOptions,
-} from './prisma.types';
+export type { TransactionCallback, TransactionClient, TransactionOptions } from './prisma.types';

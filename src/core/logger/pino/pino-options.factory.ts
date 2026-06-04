@@ -16,9 +16,7 @@ import { resolveClientIp } from '../utils/http-access-log.util';
 import type { AppConfig } from '@/config/namespaces/app.config';
 import type { LoggerConfig } from '@/config/namespaces/logger.config';
 
-function resolveIncomingId(
-  value: string | string[] | undefined,
-): string | undefined {
+function resolveIncomingId(value: string | string[] | undefined): string | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -34,11 +32,7 @@ function resolveRequestId(req: IncomingMessage): string {
   return incoming ?? randomUUID();
 }
 
-function attachRequestIdHeader(
-  req: IncomingMessage,
-  res: ServerResponse,
-  requestId: string,
-): void {
+function attachRequestIdHeader(req: IncomingMessage, res: ServerResponse, requestId: string): void {
   if (!res.getHeader(CORRELATION_ID_HEADER)) {
     res.setHeader(CORRELATION_ID_HEADER, requestId);
   }
@@ -48,10 +42,7 @@ function attachRequestIdHeader(
   }
 }
 
-export function createPinoModuleParams(
-  logger: LoggerConfig,
-  app: AppConfig,
-): Params {
+export function createPinoModuleParams(logger: LoggerConfig, app: AppConfig): Params {
   return {
     pinoHttp: {
       name: app.name,

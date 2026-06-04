@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  VERSION_NEUTRAL,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, VERSION_NEUTRAL } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -15,11 +9,8 @@ import {
 import { LivenessDataDto, ReadinessDataDto } from '../dto/health-response.dto';
 import { HealthService } from '../services/health.service';
 
-import {
-  ApiFailureMessage,
-  ApiSuccessMessage,
-  SkipRequestTimeout,
-} from '@/common/decorators';
+import { SkipRequestTimeout } from '@/common/decorators';
+import { ApiMessage } from '@/core/api';
 
 @ApiTags('Health')
 @SkipRequestTimeout()
@@ -33,8 +24,7 @@ export class HealthController {
   @ApiServiceUnavailableResponse({
     description: 'Critical health check failed',
   })
-  @ApiSuccessMessage('Health check completed')
-  @ApiFailureMessage('Health check failed')
+  @ApiMessage('Health check completed')
   getHealth() {
     return this.healthService.getDetailedHealth();
   }
@@ -43,7 +33,7 @@ export class HealthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Kubernetes liveness probe' })
   @ApiOkResponse({ type: LivenessDataDto })
-  @ApiSuccessMessage('Liveness check completed')
+  @ApiMessage('Liveness check completed')
   getLive() {
     return this.healthService.getLive();
   }
@@ -52,8 +42,7 @@ export class HealthController {
   @ApiOperation({ summary: 'Kubernetes readiness probe' })
   @ApiOkResponse({ type: ReadinessDataDto })
   @ApiServiceUnavailableResponse({ description: 'Service not ready' })
-  @ApiSuccessMessage('Readiness check completed')
-  @ApiFailureMessage('Readiness check failed')
+  @ApiMessage('Readiness check completed')
   getReady() {
     return this.healthService.getReady();
   }

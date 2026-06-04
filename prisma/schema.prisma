@@ -31,6 +31,25 @@ enum SessionStatus {
   EXPIRED
 }
 
+enum RefreshTokenStatus {
+  ACTIVE
+  USED
+  REVOKED
+}
+
+enum DeviceType {
+  MOBILE
+  WEB
+  DESKTOP
+  TABLET
+}
+
+enum DevicePlatform {
+  IOS
+  ANDROID
+  WEB
+}
+
 enum WorkspaceMemberRole {
   OWNER
   ADMIN
@@ -99,25 +118,53 @@ model User {
 
   email           String   @unique
 
-  passwordHash    String?
-
   avatar          String?
 
   isEmailVerified Boolean  @default(false)
 
-  lastLoginAt     DateTime?
+  lastActiveAt    DateTime?
 
   createdAt       DateTime @default(now())
 
   updatedAt       DateTime @updatedAt
 
-  authProviders     AuthProviderAccount[]
+  credential          UserCredential?
 
-  memberships     WorkspaceMember[]
+  authProviders       UserAuthProviderAccount[]
 
-  createdAutomations Automation[] @relation("AutomationCreatedBy")
+  sessions            UserSession[]
+
+  refreshTokens       UserRefreshToken[]
+
+  otpCodes            UserOtpCode[]
+
+  passwordResetTokens UserPasswordResetToken[]
+
+  memberships         WorkspaceMember[]
+
+  createdAutomations  Automation[] @relation("AutomationCreatedBy")
 
   @@index([email])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// USER CREDENTIALS ////////////////
+//////////////////////////////////////////////////////
+
+model UserCredential {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  userId            String   @unique @db.Uuid
+
+  passwordHash      String
+
+  passwordChangedAt DateTime?
+
+  createdAt         DateTime @default(now())
+
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 //////////////////////////////////////////////////////
@@ -125,29 +172,89 @@ model User {
 //////////////////////////////////////////////////////
 
 model UserSession {
-  id                String   @id @default(uuid()) @db.Uuid
+  id              String         @id @default(uuid()) @db.Uuid
 
-  userId            String   @db.Uuid
+  userId          String         @db.Uuid
 
-  refreshTokenHash  String
+  status          SessionStatus  @default(ACTIVE)
 
-  userAgent         String?
+  deviceId        String
 
-  ipAddress         String?
+  deviceName      String?
 
-  deviceName        String?
+  deviceType      DeviceType?
 
-  status            SessionStatus @default(ACTIVE)
+  platform        DevicePlatform?
 
-  expiresAt         DateTime
+  osVersion       String?
 
-  lastUsedAt        DateTime?
+  appVersion      String?
 
-  revokedAt         DateTime?
+  userAgent       String?
 
-  createdAt         DateTime @default(now())
+  fcmToken        String?
 
-  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress       String?
+
+  country         String?
+
+  region          String?
+
+  city            String?
+
+  loginAt         DateTime       @default(now())
+
+  lastActivityAt  DateTime?
+
+  expiresAt       DateTime
+
+  revokedAt       DateTime?
+
+  createdAt       DateTime       @default(now())
+
+  updatedAt       DateTime       @updatedAt
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshTokens   UserRefreshToken[]
+
+  @@unique([userId, deviceId])
+
+  @@index([userId])
+
+  @@index([status])
+
+  @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// USER REFRESH TOKENS //////////////
+//////////////////////////////////////////////////////
+
+model UserRefreshToken {
+  id          String    @id @default(uuid()) @db.Uuid
+
+  sessionId   String    @db.Uuid
+
+  userId      String    @db.Uuid
+
+  tokenFamily String 
+
+  jti         String    @unique
+
+  tokenHash   String
+
+  status      RefreshTokenStatus @default(ACTIVE)
+
+  expiresAt   DateTime
+
+  createdAt   DateTime  @default(now())
+
+  session     UserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
 
   @@index([userId])
 
@@ -256,8 +363,6 @@ model Admin {
 
   email             String   @unique
 
-  passwordHash      String
-
   avatar            String?
 
   isActive          Boolean  @default(true)
@@ -268,11 +373,37 @@ model Admin {
 
   updatedAt         DateTime @updatedAt
 
-  roles             AdminRoleAssignment[]
+  credential          AdminCredential?
 
-  sessions          AdminSession[]
+  roles               AdminRoleAssignment[]
+
+  sessions            AdminSession[]
+
+  refreshTokens       AdminRefreshToken[]
+
+  passwordResetTokens AdminPasswordResetToken[]
 
   @@index([email])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// ADMIN CREDENTIALS ///////////////
+//////////////////////////////////////////////////////
+
+model AdminCredential {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  adminId           String   @unique @db.Uuid
+
+  passwordHash      String
+
+  passwordChangedAt DateTime?
+
+  createdAt         DateTime @default(now())
+
+  updatedAt         DateTime @updatedAt
+
+  admin             Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }
 
 //////////////////////////////////////////////////////
@@ -302,17 +433,23 @@ model AdminRole {
 //////////////////////////////////////////////////////
 
 model AdminPermission {
-  id                String   @id @default(uuid()) @db.Uuid
+  id          String   @id @default(uuid()) @db.Uuid
 
-  key               String   @unique
+  resource    String
 
-  description       String?
+  action      String
 
-  createdAt         DateTime @default(now())
+  key         String   @unique
 
-  updatedAt         DateTime @updatedAt
+  description String?
 
-  roles             AdminRolePermission[]
+  createdAt   DateTime @default(now())
+
+  updatedAt   DateTime @updatedAt
+
+  roles       AdminRolePermission[]
+
+  @@unique([resource, action])
 }
 
 //////////////////////////////////////////////////////
@@ -358,25 +495,93 @@ model AdminRoleAssignment {
 //////////////////////////////////////////////////////
 
 model AdminSession {
-  id                String   @id @default(uuid()) @db.Uuid
+  id              String         @id @default(uuid()) @db.Uuid
 
-  adminId           String   @db.Uuid
+  adminId         String         @db.Uuid
 
-  refreshTokenHash  String
+  status          SessionStatus  @default(ACTIVE)
 
-  ipAddress         String?
+  deviceId        String
 
-  userAgent         String?
+  deviceName      String?
 
-  expiresAt         DateTime
+  deviceType      DeviceType?
 
-  revokedAt         DateTime?
+  platform        DevicePlatform?
 
-  createdAt         DateTime @default(now())
+  osVersion       String?
 
-  admin             Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  appVersion      String?
+
+  userAgent       String?
+
+  fcmToken        String?
+
+  ipAddress       String?
+
+  country         String?
+
+  region          String?
+
+  city            String?
+
+  loginAt         DateTime       @default(now())
+
+  lastActivityAt  DateTime?
+
+  expiresAt       DateTime
+
+  revokedAt       DateTime?
+
+  createdAt       DateTime       @default(now())
+
+  updatedAt       DateTime       @updatedAt
+
+  admin           Admin          @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  refreshTokens   AdminRefreshToken[]
+
+  @@unique([adminId, deviceId])
 
   @@index([adminId])
+
+  @@index([status])
+
+  @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+//////////////// ADMIN REFRESH TOKENS ////////////////
+//////////////////////////////////////////////////////
+
+model AdminRefreshToken {
+  id          String             @id @default(uuid()) @db.Uuid
+
+  sessionId   String             @db.Uuid
+
+  adminId     String             @db.Uuid
+
+  tokenFamily String
+
+  jti         String             @unique
+
+  tokenHash   String
+
+  status      RefreshTokenStatus @default(ACTIVE)
+
+  expiresAt   DateTime
+
+  createdAt   DateTime           @default(now())
+
+  session     AdminSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  admin       Admin        @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+
+  @@index([adminId])
+
+  @@index([expiresAt])
 }
 
 //////////////////////////////////////////////////////

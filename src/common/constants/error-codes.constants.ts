@@ -1,3 +1,3 @@
-/** @deprecated Import from `@/common/errors` instead. */
-export { ErrorCode } from '@/common/errors';
-export type { ErrorCode as ErrorCodeType } from '@/common/errors';
+/** @deprecated Import from `@/core/api` instead. */
+export { ErrorCode } from '@/core/api';
+export type { ErrorCodeType } from '@/core/api';

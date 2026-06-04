@@ -3,9 +3,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { Environment } from '@/common/enums';
 import type { AppConfigService } from '@/config';
 
-export function buildPrismaClientOptions(
-  config: AppConfigService,
-): Prisma.PrismaClientOptions {
+export function buildPrismaClientOptions(config: AppConfigService): Prisma.PrismaClientOptions {
   const isProduction = config.app.env === Environment.Production;
 
   return {
@@ -22,6 +20,4 @@ export function createExtendedPrismaClient(config: AppConfigService) {
   return client.$extends({ name: 'app' });
 }
 
-export type ExtendedPrismaClient = ReturnType<
-  typeof createExtendedPrismaClient
->;
+export type ExtendedPrismaClient = ReturnType<typeof createExtendedPrismaClient>;

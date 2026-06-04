@@ -1,8 +1,4 @@
-import {
-  INestApplication,
-  RequestMethod,
-  VersioningType,
-} from '@nestjs/common';
+import { INestApplication, RequestMethod, VersioningType } from '@nestjs/common';
 
 import { API_VERSION_PREFIX, ApiVersion } from '@/common/enums';
 

@@ -1,8 +1,6 @@
 import type { LogErrorPayload } from '../logger.types';
 
-export function toErrorPayload(
-  error: Error | LogErrorPayload,
-): LogErrorPayload {
+export function toErrorPayload(error: Error | LogErrorPayload): LogErrorPayload {
   if (error instanceof Error) {
     return {
       name: error.name,

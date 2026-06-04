@@ -43,27 +43,18 @@ export class AppLoggerService implements IAppLogger {
     this.log(LogLevel.Warn, message, meta);
   }
 
-  error(
-    message: string,
-    meta?: LogMetadata,
-    error?: Error | LogErrorPayload,
-  ): void {
+  error(message: string, meta?: LogMetadata, error?: Error | LogErrorPayload): void {
     const payload = error ? { ...meta, err: toErrorPayload(error) } : meta;
     this.log(LogLevel.Error, message, payload);
   }
 
-  fatal(
-    message: string,
-    meta?: LogMetadata,
-    error?: Error | LogErrorPayload,
-  ): void {
+  fatal(message: string, meta?: LogMetadata, error?: Error | LogErrorPayload): void {
     const payload = error ? { ...meta, err: toErrorPayload(error) } : meta;
     this.log(LogLevel.Fatal, message, payload);
   }
 
   child(bindings: LogBindings): IAppLogger {
-    const nextContext =
-      bindings.context !== undefined ? String(bindings.context) : this.context;
+    const nextContext = bindings.context !== undefined ? String(bindings.context) : this.context;
 
     return new AppLoggerService(this.pino, nextContext, {
       ...this.bindings,

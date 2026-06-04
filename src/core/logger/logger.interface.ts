@@ -11,17 +11,9 @@ export interface IAppLogger {
 
   warn(message: string, meta?: LogMetadata): void;
 
-  error(
-    message: string,
-    meta?: LogMetadata,
-    error?: Error | LogErrorPayload,
-  ): void;
+  error(message: string, meta?: LogMetadata, error?: Error | LogErrorPayload): void;
 
-  fatal(
-    message: string,
-    meta?: LogMetadata,
-    error?: Error | LogErrorPayload,
-  ): void;
+  fatal(message: string, meta?: LogMetadata, error?: Error | LogErrorPayload): void;
 
   child(bindings: LogBindings): IAppLogger;
 }

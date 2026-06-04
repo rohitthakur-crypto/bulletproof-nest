@@ -1,7 +1,7 @@
 import type {
-  CursorPaginationMeta,
-  OffsetPaginationMeta,
-} from '@/common/types';
+  CursorPagination as CursorPaginationMeta,
+  OffsetPagination as OffsetPaginationMeta,
+} from '@/core/api';
 
 export interface OffsetPaginationInput {
   page: number;

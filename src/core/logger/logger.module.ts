@@ -6,23 +6,17 @@ import { LoggerFactory } from './logger.factory';
 import { AppLoggerService } from './logger.service';
 import { createPinoModuleParams } from './pino/pino-options.factory';
 
-import { AppConfigService } from '@/config/app-config.service';
+import { AppConfigService } from '@/config';
 
 @Global()
 @Module({
   imports: [
     NestPinoLoggerModule.forRootAsync({
       inject: [AppConfigService],
-      useFactory: (config: AppConfigService) =>
-        createPinoModuleParams(config.logger, config.app),
+      useFactory: (config: AppConfigService) => createPinoModuleParams(config.logger, config.app),
     }),
   ],
   providers: [AppLoggerService, LoggerFactory, LoggingInterceptor],
-  exports: [
-    AppLoggerService,
-    LoggerFactory,
-    LoggingInterceptor,
-    NestPinoLoggerModule,
-  ],
+  exports: [AppLoggerService, LoggerFactory, LoggingInterceptor, NestPinoLoggerModule],
 })
 export class AppLoggerModule {}

@@ -1,8 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
-import { ErrorCode, type ErrorCode as ErrorCodeType } from '@/common/errors';
-import type { ValidationDetail } from '@/common/response';
+import { ErrorCode, type ErrorCodeType } from '@/core/api';
+import type { ValidationDetail } from '@/core/api';
 
 export interface MappedPrismaError {
   statusCode: number;
@@ -35,9 +35,7 @@ export function mapPrismaError(error: unknown): MappedPrismaError | null {
   return null;
 }
 
-function mapKnownError(
-  error: Prisma.PrismaClientKnownRequestError,
-): MappedPrismaError {
+function mapKnownError(error: Prisma.PrismaClientKnownRequestError): MappedPrismaError {
   switch (error.code) {
     case 'P2002':
       return {

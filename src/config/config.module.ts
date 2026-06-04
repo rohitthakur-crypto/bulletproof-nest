@@ -3,9 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 
 import { AppConfigService } from './app-config.service'; // TODO: move to services folder
 import { appConfig } from './namespaces/app.config';
-import { authConfig } from './namespaces/auth.config';
 import { databaseConfig } from './namespaces/database.config';
 import { firebaseConfig } from './namespaces/firebase.config';
+import { jwtConfig } from './namespaces/jwt.config';
 import { loggerConfig } from './namespaces/logger.config';
 import { queueConfig } from './namespaces/queue.config';
 import { redisConfig } from './namespaces/redis.config';
@@ -22,7 +22,7 @@ import { validateEnv } from './validation/validate-env';
       load: [
         appConfig,
         databaseConfig,
-        authConfig,
+        jwtConfig,
         redisConfig,
         firebaseConfig,
         queueConfig,

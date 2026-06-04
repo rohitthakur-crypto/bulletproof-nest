@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { AppConfig } from './namespaces/app.config';
-import type { AuthConfig } from './namespaces/auth.config';
 import type { DatabaseConfig } from './namespaces/database.config';
 import type { FirebaseConfig } from './namespaces/firebase.config';
+import type { JwtConfig } from './namespaces/jwt.config';
 import type { LoggerConfig } from './namespaces/logger.config';
 import type { QueueConfig } from './namespaces/queue.config';
 import type { RedisConfig } from './namespaces/redis.config';
@@ -32,8 +32,12 @@ export class AppConfigService {
     return this.configService.getOrThrow<DatabaseConfig>('database');
   }
 
-  get auth(): AuthConfig {
-    return this.configService.getOrThrow<AuthConfig>('auth');
+  // get auth(): AuthConfig {
+  //   return this.configService.getOrThrow<AuthConfig>('auth');
+  // }
+
+  get jwt(): JwtConfig {
+    return this.configService.getOrThrow<JwtConfig>('jwt');
   }
 
   get redis(): RedisConfig {
