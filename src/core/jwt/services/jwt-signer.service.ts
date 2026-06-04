@@ -24,8 +24,11 @@ export class JwtSignerService {
     const options: JwtCoreSignOptions = {
       privateKey: keys.privateKey,
       expiresIn: toSeconds(keys.expiresIn as StringValue),
-      kid: keys.kid,
       algorithm: JWT_TOKEN_CONFIG.algorithm,
+      header: {
+        alg: JWT_TOKEN_CONFIG.algorithm,
+        kid: keys.kid,
+      },
     };
 
     return this.jwtService.signAsync(payload, options);

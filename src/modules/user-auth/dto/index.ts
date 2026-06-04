@@ -4,8 +4,6 @@ export {
   type AuthTokenResponse,
 } from './auth-token.response.dto';
 
-export { UserResponseDto, userResponseSchema, type UserResponse } from './user.response.dto';
-
 export {
   UserAuthResponseDto,
   userAuthResponseSchema,

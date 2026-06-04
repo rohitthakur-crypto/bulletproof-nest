@@ -30,6 +30,19 @@ export class UserSessionRepository extends BasePrismaRepository {
     return this.db.userSession.create({ data });
   }
 
+  async upsertByUserAndDevice(
+    userId: string,
+    deviceId: string,
+    create: Prisma.UserSessionCreateInput,
+    update: Prisma.UserSessionUpdateInput,
+  ): Promise<UserSession> {
+    return this.db.userSession.upsert({
+      where: { userId_deviceId: { userId, deviceId } },
+      create,
+      update,
+    });
+  }
+
   async update(id: string, data: Prisma.UserSessionUpdateInput): Promise<UserSession> {
     return this.db.userSession.update({ where: { id }, data });
   }

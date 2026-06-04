@@ -6,7 +6,7 @@ export {
   UserCredentialRepository,
   UserOAuthAccountRepository,
   UserOtpRepository,
-  UserPasswordResetRepository,
+  UserVerificationTokenRepository,
   UserRefreshTokenRepository,
   UserSessionRepository,
 } from './repositories';

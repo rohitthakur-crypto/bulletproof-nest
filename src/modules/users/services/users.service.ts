@@ -38,17 +38,10 @@ export class UsersService {
     return user;
   }
 
-  async findByEmailOrThrow(email: string): Promise<User> {
-    const user = await this.findByEmail(email);
+  async create(data: CreateUserInput): Promise<User> {
+    const existing = await this.findByEmail(data.email);
 
-    if (!user) throw new NotFoundException('User not found');
-
-    return user;
-  }
-
-  async createUser(data: CreateUserInput): Promise<User> {
-    const existing = await this.usersRepository.findByEmail(data.email);
-    if (existing) throw new ConflictException('User already exists');
+    if (existing) throw new ConflictException('Email already in use');
 
     return this.usersRepository.create(data);
   }

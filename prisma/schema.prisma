@@ -39,7 +39,6 @@ enum RefreshTokenStatus {
 
 enum DeviceType {
   MOBILE
-  WEB
   DESKTOP
   TABLET
 }
@@ -48,6 +47,12 @@ enum DevicePlatform {
   IOS
   ANDROID
   WEB
+}
+
+enum VerificationTokenType {
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
+  PASSWORD_RESET
 }
 
 enum WorkspaceMemberRole {
@@ -138,7 +143,7 @@ model User {
 
   otpCodes            UserOtpCode[]
 
-  passwordResetTokens UserPasswordResetToken[]
+  verificationTokens UserVerificationToken[]
 
   memberships         WorkspaceMember[]
 
@@ -292,25 +297,31 @@ model UserOtpCode {
 }
 
 //////////////////////////////////////////////////////
-//////////////////// USER PASSWORD RESET TOKENS //////
+//////////////////// USER VERIFICATION TOKENS ////////
 //////////////////////////////////////////////////////
 
-model UserPasswordResetToken {
-  id                String   @id @default(uuid()) @db.Uuid
+model UserVerificationToken {
+  id          String   @id @default(uuid()) @db.Uuid
 
-  userId            String   @db.Uuid
+  userId      String   @db.Uuid
 
-  tokenHash         String
+  type        VerificationTokenType
 
-  expiresAt         DateTime
+  tokenHash   String
 
-  usedAt            DateTime?
+  expiresAt   DateTime
 
-  createdAt         DateTime @default(now())
+  usedAt      DateTime?
 
-  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metadata    Json?
+
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+
+  @@index([type])
 
   @@index([expiresAt])
 }

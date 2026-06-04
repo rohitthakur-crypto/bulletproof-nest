@@ -2,7 +2,8 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 import { authTokenResponseSchema } from './auth-token.response.dto';
-import { userResponseSchema } from './user.response.dto';
+
+import { userResponseSchema } from '@/modules/users';
 
 export const userAuthResponseSchema = z
   .object({

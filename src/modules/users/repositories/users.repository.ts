@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { User } from '@prisma/client';
-
-import type { CreateUserInput } from '../dto/create-user.dto';
-import type { UpdateUserInput } from '../dto/update-user.dto';
+import type { Prisma, User } from '@prisma/client';
 
 import { BasePrismaRepository, PrismaService } from '@/infra/prisma';
 
@@ -25,11 +22,11 @@ export class UsersRepository extends BasePrismaRepository {
     return count > 0;
   }
 
-  async create(data: CreateUserInput): Promise<User> {
+  async create(data: Prisma.UserCreateInput): Promise<User> {
     return this.db.user.create({ data });
   }
 
-  async update(id: string, data: UpdateUserInput): Promise<User> {
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
     return this.db.user.update({ where: { id }, data });
   }
 

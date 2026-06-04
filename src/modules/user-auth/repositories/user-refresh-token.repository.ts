@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { RefreshTokenStatus, type Prisma, type UserRefreshToken } from '@prisma/client';
+import { RefreshTokenStatus, type UserRefreshToken } from '@prisma/client';
+
+import { SaveRefreshTokenInput } from '../interfaces';
 
 import { BasePrismaRepository, PrismaService } from '@/infra/prisma';
 
@@ -24,7 +26,7 @@ export class UserRefreshTokenRepository extends BasePrismaRepository {
     });
   }
 
-  async create(data: Prisma.UserRefreshTokenCreateInput): Promise<UserRefreshToken> {
+  async create(data: SaveRefreshTokenInput): Promise<UserRefreshToken> {
     return this.db.userRefreshToken.create({ data });
   }
 
