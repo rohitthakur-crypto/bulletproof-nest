@@ -3,7 +3,7 @@ import { createZodValidationPipe } from 'nestjs-zod';
 
 export function setupValidation(app: INestApplication): void {
   const ZodValidationPipe = createZodValidationPipe({
-    strictSchemaDeclaration: true,
+    strictSchemaDeclaration: false,
   });
 
   app.useGlobalPipes(new ZodValidationPipe());

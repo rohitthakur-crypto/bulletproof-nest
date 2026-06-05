@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { UserAuthResponseDto, type UserAuthResponse } from '../dto';
@@ -25,6 +25,7 @@ export class UserAuthController {
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   @ApiMessage('Login successful')
   @ApiOkResponse({
     description: 'Login successful',

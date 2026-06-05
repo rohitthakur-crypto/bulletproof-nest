@@ -12,20 +12,22 @@ export class UsersCacheService {
     byEmail: (email: string) => this.cache.buildKey('users', 'email', email),
   };
 
-  async getById(id: string): Promise<User | null> {
-    return this.cache.get<User>(this.keys.byId(id));
+  /** Cache-aside with stampede protection — use when the loader always returns a value. */
+  rememberById(id: string, loader: () => Promise<User>): Promise<User> {
+    return this.cache.remember(this.keys.byId(id), CACHE_TTL.FIVE_MIN, loader);
   }
 
-  async setById(id: string, user: User): Promise<void> {
-    await this.cache.set(this.keys.byId(id), user, CACHE_TTL.FIVE_MIN);
-  }
+  /** Cache-aside without caching null — use when the loader may return null. */
+  async getOrSetByEmail(email: string, loader: () => Promise<User | null>): Promise<User | null> {
+    const cached = await this.cache.get<User>(this.keys.byEmail(email));
+    if (cached) return cached;
 
-  async getByEmail(email: string): Promise<User | null> {
-    return this.cache.get<User>(this.keys.byEmail(email));
-  }
+    const user = await loader();
+    if (user) {
+      await this.cache.set(this.keys.byEmail(email), user, CACHE_TTL.FIVE_MIN);
+    }
 
-  async setByEmail(email: string, user: User): Promise<void> {
-    await this.cache.set(this.keys.byEmail(email), user, CACHE_TTL.FIVE_MIN);
+    return user;
   }
 
   async invalidateUser(id: string, email: string): Promise<void> {

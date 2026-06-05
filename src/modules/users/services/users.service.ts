@@ -14,28 +14,18 @@ export class UsersService {
     private readonly usersCache: UsersCacheService,
   ) {}
 
-  async findById(id: string): Promise<User> {
-    const cached = await this.usersCache.getById(id);
-    if (cached) return cached;
+  findById(id: string): Promise<User> {
+    return this.usersCache.rememberById(id, async () => {
+      const user = await this.usersRepository.findById(id);
 
-    const user = await this.usersRepository.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+      if (!user) throw new NotFoundException('User not found');
 
-    await this.usersCache.setById(id, user);
-
-    return user;
+      return user;
+    });
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    const cached = await this.usersCache.getByEmail(email);
-    if (cached) return cached;
-
-    const user = await this.usersRepository.findByEmail(email);
-    if (!user) return null;
-
-    await this.usersCache.setByEmail(email, user);
-
-    return user;
+  findByEmail(email: string): Promise<User | null> {
+    return this.usersCache.getOrSetByEmail(email, () => this.usersRepository.findByEmail(email));
   }
 
   async create(data: CreateUserInput): Promise<User> {
@@ -47,7 +37,8 @@ export class UsersService {
   }
 
   async updateUser(id: string, data: UpdateUserInput): Promise<User> {
-    const existing = await this.usersRepository.findById(id);
+    const existing = await this.findById(id);
+
     if (!existing) throw new NotFoundException('User not found');
 
     const updated = await this.usersRepository.update(id, data);

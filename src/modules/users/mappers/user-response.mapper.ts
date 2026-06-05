@@ -2,6 +2,8 @@ import type { User } from '@prisma/client';
 
 import type { UserResponse } from '../dto/user.response.dto';
 
+import { toIsoString } from '@/common/utils';
+
 export function toUserResponse(user: User): UserResponse {
   return {
     id: user.id,
@@ -9,8 +11,8 @@ export function toUserResponse(user: User): UserResponse {
     email: user.email,
     avatar: user.avatar ?? undefined,
     isEmailVerified: user.isEmailVerified,
-    lastActiveAt: user.lastActiveAt?.toISOString(),
-    createdAt: user.createdAt.toISOString(),
-    updatedAt: user.updatedAt.toISOString(),
+    lastActiveAt: toIsoString(user.lastActiveAt),
+    createdAt: toIsoString(user.createdAt)!,
+    updatedAt: toIsoString(user.updatedAt)!,
   };
 }
