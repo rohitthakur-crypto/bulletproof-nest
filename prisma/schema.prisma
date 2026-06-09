@@ -11,6 +11,11 @@ datasource db {
 //////////////////////////////////////////////////////
 //////////////////// ENUMS ///////////////////////////
 //////////////////////////////////////////////////////
+enum EntityStatus {
+  ACTIVE
+  INACTIVE
+  DELETED
+}
 
 enum AuthProvider {
   EMAIL
@@ -262,6 +267,8 @@ model UserRefreshToken {
   @@index([sessionId])
 
   @@index([userId])
+
+  @@index([tokenFamily])
 
   @@index([expiresAt])
 }
@@ -631,10 +638,6 @@ model Workspace {
   slug            String   @unique
 
   logo            String?
-
-  plan            String? // free/pro/enterprise
-
-  timezone        String?
 
   createdAt       DateTime @default(now())
 

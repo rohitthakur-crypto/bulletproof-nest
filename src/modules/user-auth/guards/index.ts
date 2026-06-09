@@ -1,1 +1,1 @@
-export { UserAccessTokenGuard } from './user-access-token.guard';
+export { UserAuthGuard } from './user-auth.guard';

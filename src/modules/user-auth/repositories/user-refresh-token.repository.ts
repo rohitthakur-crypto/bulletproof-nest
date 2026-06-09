@@ -44,6 +44,24 @@ export class UserRefreshTokenRepository extends BasePrismaRepository {
     });
   }
 
+  async markAsUsed(jti: string): Promise<UserRefreshToken> {
+    return this.db.userRefreshToken.update({
+      where: { jti },
+      data: { status: RefreshTokenStatus.USED },
+    });
+  }
+
+  async revokeAllInFamily(tokenFamily: string): Promise<number> {
+    const result = await this.db.userRefreshToken.updateMany({
+      where: {
+        tokenFamily,
+        status: { in: [RefreshTokenStatus.ACTIVE, RefreshTokenStatus.USED] },
+      },
+      data: { status: RefreshTokenStatus.REVOKED },
+    });
+    return result.count;
+  }
+
   async revokeAllForSession(sessionId: string): Promise<number> {
     const result = await this.db.userRefreshToken.updateMany({
       where: { sessionId, status: RefreshTokenStatus.ACTIVE },

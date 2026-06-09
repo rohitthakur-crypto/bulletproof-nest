@@ -1,12 +1,13 @@
 import { randomUUID } from 'node:crypto';
 
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import type { User } from '@prisma/client';
+import { Workspace, WorkspaceMemberRole, type User } from '@prisma/client';
 import type { StringValue } from 'ms';
 
 import { AuthTokenResponse, UserAuthResponse } from '../dto';
-import type { AuthDeviceContext, CreateSessionInput } from '../interfaces';
+import type { AuthDeviceContext, AuthenticatedUser, CreateSessionInput } from '../interfaces';
 import type { LoginInput } from '../validators/login.schema';
+import type { RefreshInput } from '../validators/refresh.schema';
 import { RegisterInput } from '../validators/register.schema';
 
 import { UserCredentialService } from './user-credential.service';
@@ -19,16 +20,19 @@ import { hashToken, toDate } from '@/common/utils';
 import { AppConfigService } from '@/config';
 import { TokenType } from '@/core/jwt';
 import { toUserResponse, UsersService } from '@/modules/users';
+import { toWorkspaceResponse, WorkspaceMemberService, WorkspaceService } from '@/modules/workspace';
 
 @Injectable()
 export class UserAuthService {
   constructor(
+    private readonly config: AppConfigService,
     private readonly usersService: UsersService,
     private readonly userCredentialService: UserCredentialService,
     private readonly userSessionService: UserSessionService,
     private readonly userTokenService: UserTokenService,
     private readonly userRefreshTokenService: UserRefreshTokenService,
-    private readonly config: AppConfigService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly workspaceMemberService: WorkspaceMemberService,
   ) {}
 
   async register(payload: RegisterInput): Promise<UserAuthResponse> {
@@ -39,10 +43,22 @@ export class UserAuthService {
 
     await this.userCredentialService.create(user.id, payload.password);
 
-    const tokens = await this.createSessionAndIssueTokens(user.id, this.toDeviceContext(payload));
+    const workspace = await this.workspaceService.create({ name: `${payload.name}'s Workspace` });
+
+    await this.workspaceMemberService.create(workspace.id, {
+      userId: user.id,
+      role: WorkspaceMemberRole.OWNER,
+    });
+
+    const tokens = await this.createSessionAndIssueTokens(
+      user.id,
+      workspace,
+      this.toDeviceContext(payload),
+    );
 
     return {
       user: toUserResponse(user),
+      workspace: toWorkspaceResponse(workspace),
       tokens,
     };
   }
@@ -52,7 +68,52 @@ export class UserAuthService {
 
     await this.userCredentialService.verifyPassword(user.id, loginInput.password);
 
-    return this.buildAuthResponse(user, this.toDeviceContext(loginInput));
+    const workspaceMember = await this.workspaceMemberService.findLatestWorkspaceForUser(user.id);
+
+    let workspace: Workspace | null = null;
+
+    if (workspaceMember) {
+      workspace = await this.workspaceService.findById(workspaceMember.workspaceId);
+    }
+
+    const tokens = await this.createSessionAndIssueTokens(
+      user.id,
+      workspace,
+      this.toDeviceContext(loginInput),
+    );
+
+    return {
+      user: toUserResponse(user),
+      workspace: workspace ? toWorkspaceResponse(workspace) : undefined,
+      tokens,
+    };
+  }
+
+  public async refresh(refreshInput: RefreshInput): Promise<AuthTokenResponse> {
+    const { payload, record } = await this.userRefreshTokenService.consume(
+      refreshInput.refreshToken,
+    );
+
+    const workspace = payload.workspaceId
+      ? await this.workspaceService.findById(payload.workspaceId)
+      : null;
+
+    const refreshExpiresAt = this.getRefreshTokenExpiresAt();
+
+    await this.userSessionService.extendSession(payload.sessionId, refreshExpiresAt);
+
+    return this.issueAndPersistTokenPair(
+      payload.sub,
+      payload.sessionId,
+      workspace,
+      refreshExpiresAt,
+      record.tokenFamily,
+    );
+  }
+
+  public async logout(user: AuthenticatedUser): Promise<void> {
+    await this.userSessionService.revoke(user.sessionId);
+    await this.userRefreshTokenService.revokeAllForSession(user.sessionId);
   }
 
   private async findUserByEmailOrFail(email: string): Promise<User> {
@@ -65,20 +126,9 @@ export class UserAuthService {
     return user;
   }
 
-  private async buildAuthResponse(
-    user: User,
-    device: AuthDeviceContext,
-  ): Promise<UserAuthResponse> {
-    const tokens = await this.createSessionAndIssueTokens(user.id, device);
-
-    return {
-      user: toUserResponse(user),
-      tokens,
-    };
-  }
-
   private async createSessionAndIssueTokens(
     userId: string,
+    workspace: Workspace | null,
     device: AuthDeviceContext,
   ): Promise<AuthTokenResponse> {
     const refreshExpiresAt = this.getRefreshTokenExpiresAt();
@@ -89,7 +139,7 @@ export class UserAuthService {
 
     await this.userRefreshTokenService.revokeAllForSession(session.id);
 
-    return this.issueAndPersistTokenPair(userId, session.id, refreshExpiresAt);
+    return this.issueAndPersistTokenPair(userId, session.id, workspace, refreshExpiresAt);
   }
 
   private getRefreshTokenExpiresAt(): Date {
@@ -122,15 +172,18 @@ export class UserAuthService {
   private async issueAndPersistTokenPair(
     userId: string,
     sessionId: string,
+    workspace: Workspace | null,
     refreshExpiresAt: Date,
+    tokenFamily?: string,
   ): Promise<AuthTokenResponse> {
     const accessJti = randomUUID();
     const refreshJti = randomUUID();
-    const tokenFamily = randomUUID();
+    const family = tokenFamily ?? randomUUID();
 
     const accessToken = await this.userTokenService.signAccessToken({
       sub: userId,
       sessionId,
+      workspaceId: workspace?.id,
       jti: accessJti,
       actorType: AuthActorType.USER,
       type: TokenType.ACCESS,
@@ -139,6 +192,7 @@ export class UserAuthService {
     const refreshToken = await this.userTokenService.signRefreshToken({
       sub: userId,
       sessionId,
+      workspaceId: workspace?.id,
       jti: refreshJti,
       actorType: AuthActorType.USER,
       type: TokenType.REFRESH,
@@ -148,7 +202,7 @@ export class UserAuthService {
       userId,
       sessionId,
       jti: refreshJti,
-      tokenFamily,
+      tokenFamily: family,
       expiresAt: refreshExpiresAt,
       tokenHash: hashToken(refreshToken),
     });

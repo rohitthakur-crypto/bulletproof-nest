@@ -537,4 +537,6 @@ FINAL RECOMMENDED DEVELOPMENT FLOW: DAILY FLOW
 
 8. git push
 
+9. npx prisma studio
+
 ; i want a code of user repostory user service and user cache want better stcrured enterprse code wasy o scale production rady acrchure

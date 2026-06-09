@@ -7,12 +7,12 @@ import { UserProfileService } from '../services/user-profile.service';
 import { ApiVersion } from '@/common/enums';
 import { ApiMessage } from '@/core/api';
 import { CurrentUser } from '@/modules/user-auth/decorators/current-user.decorator';
-import { UserAccessTokenGuard } from '@/modules/user-auth/guards/user-access-token.guard';
+import { UserAuthGuard } from '@/modules/user-auth/guards/user-auth.guard';
 import type { AuthenticatedUser } from '@/modules/user-auth/interfaces';
 
 @ApiTags('Users')
 @Controller({ path: 'users', version: ApiVersion.V1 })
-@UseGuards(UserAccessTokenGuard)
+@UseGuards(UserAuthGuard)
 @ApiBearerAuth()
 export class UserProfileController {
   constructor(private readonly userProfileService: UserProfileService) {}

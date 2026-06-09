@@ -4,7 +4,7 @@ import { Environment } from '@/common/enums';
 import type { AppConfigService } from '@/config';
 
 export function buildPrismaClientOptions(config: AppConfigService): Prisma.PrismaClientOptions {
-  const isProduction = config.app.env === Environment.Production;
+  const isProduction = config.app.env === Environment.PRODUCTION;
 
   return {
     datasources: {

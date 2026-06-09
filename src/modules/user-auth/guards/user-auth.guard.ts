@@ -2,13 +2,17 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { FastifyRequest } from 'fastify';
 
 import { AuthenticatedRequest } from '../interfaces';
+import { UserSessionService } from '../services/user-session.service';
 
 import { AuthActorType } from '@/common/enums';
 import { AccessTokenPayload, JwtVerifierService, TokenType } from '@/core/jwt';
 
 @Injectable()
-export class UserAccessTokenGuard implements CanActivate {
-  constructor(private readonly jwtVerifierService: JwtVerifierService) {}
+export class UserAuthGuard implements CanActivate {
+  constructor(
+    private readonly jwtVerifierService: JwtVerifierService,
+    private readonly userSessionService: UserSessionService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
@@ -29,9 +33,12 @@ export class UserAccessTokenGuard implements CanActivate {
       throw new UnauthorizedException('Unauthorized');
     }
 
+    await this.userSessionService.verifySession(payload.sessionId);
+
     request.user = {
       userId: payload.sub,
       sessionId: payload.sessionId,
+      workspaceId: payload.workspaceId ?? undefined,
     };
 
     return true;

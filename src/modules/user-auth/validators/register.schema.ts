@@ -2,7 +2,7 @@ import { DevicePlatform, DeviceType } from '@prisma/client';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
-import { passwordSchema } from '@/common/validation';
+import { passwordSchema } from '@/common/validators';
 
 export const registerSchema = z
   .object({

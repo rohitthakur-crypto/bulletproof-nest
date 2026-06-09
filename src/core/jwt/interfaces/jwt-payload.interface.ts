@@ -14,6 +14,7 @@ export interface BaseTokenPayload {
 
 export interface SessionTokenPayload extends BaseTokenPayload {
   sessionId: string;
+  workspaceId?: string;
 }
 
 export interface AccessTokenPayload extends SessionTokenPayload {

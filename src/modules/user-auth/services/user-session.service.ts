@@ -1,23 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SessionStatus, type Prisma, type UserSession } from '@prisma/client';
 
+import { UserSessionCacheService } from '../cache/user-session.cache';
 import type { CreateSessionInput } from '../interfaces';
 import { UserSessionRepository } from '../repositories/user-session.repository';
 
+import { isExpired } from '@/common/utils';
+
 @Injectable()
 export class UserSessionService {
-  constructor(private readonly userSessionRepository: UserSessionRepository) {}
+  constructor(
+    private readonly userSessionRepository: UserSessionRepository,
+    private readonly userSessionCache: UserSessionCacheService,
+  ) {}
 
-  upsertForDevice(input: CreateSessionInput): Promise<UserSession> {
+  public async upsertForDevice(input: CreateSessionInput): Promise<UserSession> {
     const now = new Date();
     const deviceData = this.toDeviceData(input);
 
-    return this.userSessionRepository.upsertByUserAndDevice(
+    const session = await this.userSessionRepository.upsertByUserAndDevice(
       input.userId,
       input.deviceId,
       {
         user: { connect: { id: input.userId } },
         ...deviceData,
+        status: SessionStatus.ACTIVE,
         expiresAt: input.expiresAt,
         lastActivityAt: now,
         loginAt: now,
@@ -31,21 +38,54 @@ export class UserSessionService {
         revokedAt: null,
       },
     );
+
+    await this.userSessionCache.invalidateById(session.id);
+
+    return session;
   }
 
-  findById(id: string): Promise<UserSession | null> {
-    return this.userSessionRepository.findById(id);
+  public async findById(id: string): Promise<UserSession | null> {
+    return this.userSessionCache.getOrSetById(id, () => this.userSessionRepository.findById(id));
   }
 
-  findByUserIdAndDeviceId(userId: string, deviceId: string): Promise<UserSession | null> {
+  public async verifySession(sessionId: string): Promise<UserSession> {
+    const session = await this.findById(sessionId);
+
+    if (!session || session.status !== SessionStatus.ACTIVE) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    if (isExpired(new Date(session.expiresAt))) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return session;
+  }
+
+  public async extendSession(sessionId: string, expiresAt: Date): Promise<UserSession> {
+    const session = await this.userSessionRepository.update(sessionId, {
+      expiresAt,
+      lastActivityAt: new Date(),
+    });
+    await this.userSessionCache.invalidateById(sessionId);
+    return session;
+  }
+
+  public findByUserIdAndDeviceId(userId: string, deviceId: string): Promise<UserSession | null> {
     return this.userSessionRepository.findByUserIdAndDeviceId(userId, deviceId);
   }
 
-  findManyByUserId(userId: string): Promise<UserSession[]> {
+  public findManyByUserId(userId: string): Promise<UserSession[]> {
     return this.userSessionRepository.findManyByUserId(userId);
   }
 
-  update(id: string, data: Prisma.UserSessionUpdateInput): Promise<UserSession> {
+  async revoke(id: string): Promise<UserSession> {
+    const session = await this.userSessionRepository.revoke(id);
+    await this.userSessionCache.invalidateById(id);
+    return session;
+  }
+
+  public update(id: string, data: Prisma.UserSessionUpdateInput): Promise<UserSession> {
     return this.userSessionRepository.update(id, data);
   }
 

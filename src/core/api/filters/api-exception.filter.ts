@@ -32,7 +32,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = extractFromHost(host);
     const reply = host.switchToHttp().getResponse<FastifyReply>();
-    const isProd = this.config.app.env === Environment.Production;
+    const isProd = this.config.app.env === Environment.PRODUCTION;
 
     const mapper = mappers.find((m) => m.supports(exception)) ?? fallback;
     const input = mapper.map(exception, ctx, isProd);
