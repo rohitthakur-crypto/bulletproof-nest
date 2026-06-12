@@ -15,7 +15,17 @@ export async function setupFastify(
   app: NestFastifyApplication,
   config: AppConfigService,
 ): Promise<void> {
-  await app.register(helmet);
+  // Swagger UI requires inline scripts/styles — default Helmet CSP blocks them on Fastify.
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [`'self'`],
+        styleSrc: [`'self'`, `'unsafe-inline'`],
+        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+        scriptSrc: [`'self'`, `'unsafe-inline'`],
+      },
+    },
+  });
 
   await app.register(cors, {
     origin: [...config.app.corsOrigins],

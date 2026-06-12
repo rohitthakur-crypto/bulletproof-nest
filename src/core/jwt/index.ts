@@ -13,4 +13,5 @@ export type {
   RefreshTokenPayload,
   PasswordResetPayload,
   EmailVerificationPayload,
+  MetaOauthTokenPayload,
 } from './interfaces/jwt-payload.interface';

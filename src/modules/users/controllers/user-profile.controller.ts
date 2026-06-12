@@ -4,13 +4,14 @@ import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserResponseDto } from '../dto';
 import { UserProfileService } from '../services/user-profile.service';
 
+import { SWAGGER_TAGS } from '@/common/constants';
 import { ApiVersion } from '@/common/enums';
 import { ApiMessage } from '@/core/api';
 import { CurrentUser } from '@/modules/user-auth/decorators/current-user.decorator';
 import { UserAuthGuard } from '@/modules/user-auth/guards/user-auth.guard';
 import type { AuthenticatedUser } from '@/modules/user-auth/interfaces';
 
-@ApiTags('Users')
+@ApiTags(SWAGGER_TAGS.USERS)
 @Controller({ path: 'users', version: ApiVersion.V1 })
 @UseGuards(UserAuthGuard)
 @ApiBearerAuth()

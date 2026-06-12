@@ -38,7 +38,6 @@ export class UserAuthGuard implements CanActivate {
     request.user = {
       userId: payload.sub,
       sessionId: payload.sessionId,
-      workspaceId: payload.workspaceId ?? undefined,
     };
 
     return true;

@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { RefreshTokenStatus, type UserRefreshToken } from '@prisma/client';
 
 import type { SaveRefreshTokenInput } from '../interfaces';
-import { UserRefreshTokenRepository } from '../repositories/user-refresh-token.repository';
+import { UserRefreshTokenRepository } from '../repositories';
 
 import { UserSessionService } from './user-session.service';
 import { UserTokenService } from './user-token.service';

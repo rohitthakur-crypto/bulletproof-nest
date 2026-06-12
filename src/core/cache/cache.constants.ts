@@ -1,6 +1,7 @@
 export const CACHE_TTL = {
   MINUTE: 60,
   FIVE_MIN: 300,
+  FIFTEEN_MIN: 900,
   THIRTY_MIN: 1_800,
   HOUR: 3_600,
   DAY: 86_400,

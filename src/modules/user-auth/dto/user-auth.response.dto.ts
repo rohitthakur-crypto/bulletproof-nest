@@ -3,13 +3,11 @@ import { z } from 'zod';
 
 import { authTokenResponseSchema } from './auth-token.response.dto';
 
-import { userResponseSchema } from '@/modules/users';
-import { workspaceResponseSchema } from '@/modules/workspace';
+import { userResponseSchema } from '@/modules/users/dto/user.response.dto';
 
 export const userAuthResponseSchema = z
   .object({
     user: userResponseSchema,
-    workspace: workspaceResponseSchema.optional(),
     tokens: authTokenResponseSchema,
   })
   .strict();

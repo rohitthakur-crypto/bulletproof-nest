@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { UserCredentialRepository } from '../repositories/user-credential.repository';
+import { UserCredentialRepository } from '../repositories';
 
 import { PasswordService } from '@/core/security/password';
 

@@ -3,7 +3,7 @@ import { SessionStatus, type Prisma, type UserSession } from '@prisma/client';
 
 import { UserSessionCacheService } from '../cache/user-session.cache';
 import type { CreateSessionInput } from '../interfaces';
-import { UserSessionRepository } from '../repositories/user-session.repository';
+import { UserSessionRepository } from '../repositories';
 
 import { isExpired } from '@/common/utils';
 

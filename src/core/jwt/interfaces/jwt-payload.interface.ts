@@ -14,7 +14,6 @@ export interface BaseTokenPayload {
 
 export interface SessionTokenPayload extends BaseTokenPayload {
   sessionId: string;
-  workspaceId?: string;
 }
 
 export interface AccessTokenPayload extends SessionTokenPayload {
@@ -33,9 +32,16 @@ export interface EmailVerificationPayload extends BaseTokenPayload {
   type: TokenType.EMAIL_VERIFICATION;
 }
 
+export interface MetaOauthTokenPayload extends SessionTokenPayload {
+  type: TokenType.META_OAUTH;
+
+  workspaceId: string;
+}
+
 export type TokenPayload =
   | AccessTokenPayload
   | RefreshTokenPayload
   | PasswordResetPayload
   | EmailVerificationPayload
-  | SessionTokenPayload;
+  | SessionTokenPayload
+  | MetaOauthTokenPayload;

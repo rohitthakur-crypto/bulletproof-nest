@@ -1,6 +1,6 @@
 import type { User } from '@prisma/client';
 
-import type { UserResponse } from '../dto/user.response.dto';
+import type { UserResponse } from '../dto';
 
 import { toIsoString } from '@/common/utils';
 

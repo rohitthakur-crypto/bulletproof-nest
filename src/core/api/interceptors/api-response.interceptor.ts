@@ -4,7 +4,7 @@ import { map } from 'rxjs';
 
 import { API_MESSAGE_KEY } from '../decorators/api-message.decorator';
 import { SKIP_ENVELOPE_KEY } from '../decorators/skip-envelope.decorator';
-import { buildSuccess, defaultSuccessMessage } from '../envelope/success.builder';
+import { buildSuccess } from '../envelope/success.builder';
 import { extractFromExecution, resolveStatusCode } from '../http/request-context';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class ApiResponseInterceptor implements NestInterceptor {
 
         return buildSuccess({
           statusCode,
-          message: customMessage ?? defaultSuccessMessage(statusCode),
+          message: customMessage ?? 'success',
           data: data ?? null,
           requestId: ctx.requestId,
           path: ctx.path,

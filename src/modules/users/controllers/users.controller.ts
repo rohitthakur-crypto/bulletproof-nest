@@ -7,7 +7,7 @@
 // import { ApiVersion } from '@/common/enums';
 // import { ApiMessage } from '@/core/api';
 
-// @ApiTags('Users')
+// @ApiTags(SWAGGER_TAGS.USERS)
 // @Controller({ path: 'users', version: ApiVersion.V1 })
 // export class UsersController {
 //   constructor(private readonly usersService: UsersService) {}

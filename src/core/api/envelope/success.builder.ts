@@ -18,11 +18,6 @@ export function buildSuccess<T>(input: BuildSuccessInput<T>): ApiSuccessResponse
   };
 }
 
-export function defaultSuccessMessage(statusCode: number): string {
-  if (statusCode === 201) return 'Resource created successfully';
-  return 'Request completed successfully';
-}
-
 function buildMeta(requestId: string, path: string): ApiMeta {
   return { timestamp: new Date().toISOString(), requestId, path };
 }

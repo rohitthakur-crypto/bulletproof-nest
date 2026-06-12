@@ -6,7 +6,7 @@ import { JwtKeyPair } from '../interfaces/jwt-key-pair.interface';
 
 import { AuthActorType } from '@/common/enums';
 import { AppConfigService } from '@/config';
-import type { JwtKeyPairConfig } from '@/config/namespaces/jwt.config';
+import type { JwtKeyPairConfig } from '@/config/interfaces';
 
 @Injectable()
 export class JwtKeyService {
@@ -43,6 +43,10 @@ export class JwtKeyService {
     return this.toKeyPair(this.appConfig.jwt.admin.passwordReset, JWT_KIDS.ADMIN_PASSWORD_RESET);
   }
 
+  getMetaOauthStateKeys(): JwtKeyPair {
+    return this.toKeyPair(this.appConfig.jwt.meta.state, JWT_KIDS.META_OAUTH_STATE);
+  }
+
   getKeys(actor: AuthActorType, tokenType: TokenType): JwtKeyPair {
     if (actor === AuthActorType.USER) {
       switch (tokenType) {
@@ -57,6 +61,9 @@ export class JwtKeyService {
 
         case TokenType.EMAIL_VERIFICATION:
           return this.getUserEmailVerificationKeys();
+
+        case TokenType.META_OAUTH:
+          return this.getMetaOauthStateKeys();
       }
     }
 

@@ -2,14 +2,14 @@ import { forwardRef, Module } from '@nestjs/common';
 
 import { UserSessionCacheService } from './cache/user-session.cache';
 import { UserAuthController } from './controllers/user-auth.controller';
-import { UserAuthGuard } from './guards/user-auth.guard';
+import { UserAuthGuard } from './guards';
 import {
   UserCredentialRepository,
   UserOAuthAccountRepository,
   UserOtpRepository,
-  UserVerificationTokenRepository,
   UserRefreshTokenRepository,
   UserSessionRepository,
+  UserVerificationTokenRepository,
 } from './repositories';
 import { UserAuthService } from './services/user-auth.service';
 import { UserCredentialService } from './services/user-credential.service';
@@ -20,10 +20,15 @@ import { UserTokenService } from './services/user-token.service';
 import { JwtModule as CoreJwtModule } from '@/core/jwt';
 import { PasswordModule } from '@/core/security/password';
 import { UsersModule } from '@/modules/users';
-import { WorkspaceModule } from '@/modules/workspace';
+import { WorkspaceModule } from '@/modules/workspaces';
 
 @Module({
-  imports: [forwardRef(() => UsersModule), WorkspaceModule, CoreJwtModule, PasswordModule],
+  imports: [
+    forwardRef(() => UsersModule),
+    forwardRef(() => WorkspaceModule),
+    CoreJwtModule,
+    PasswordModule,
+  ],
   controllers: [UserAuthController],
   providers: [
     UserAuthService,

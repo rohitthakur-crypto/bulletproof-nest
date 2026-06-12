@@ -1,14 +1,18 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { AppConfigService } from './app-config.service'; // TODO: move to services folder
-import { appConfig } from './namespaces/app.config';
-import { databaseConfig } from './namespaces/database.config';
-import { firebaseConfig } from './namespaces/firebase.config';
-import { jwtConfig } from './namespaces/jwt.config';
-import { loggerConfig } from './namespaces/logger.config';
-import { queueConfig } from './namespaces/queue.config';
-import { redisConfig } from './namespaces/redis.config';
+import {
+  appConfig,
+  databaseConfig,
+  firebaseConfig,
+  jwtConfig,
+  loggerConfig,
+  metaConfig,
+  queueConfig,
+  redisConfig,
+  securityConfig,
+} from './loaders';
+import { AppConfigService } from './services/app-config.service';
 import { validateEnv } from './validation/validate-env';
 
 @Global()
@@ -27,6 +31,8 @@ import { validateEnv } from './validation/validate-env';
         firebaseConfig,
         queueConfig,
         loggerConfig,
+        metaConfig,
+        securityConfig,
       ],
     }),
   ],

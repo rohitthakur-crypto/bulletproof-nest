@@ -6,13 +6,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { LivenessDataDto, ReadinessDataDto } from '../dto/health-response.dto';
+import { LivenessDataDto, ReadinessDataDto } from '../dto';
 import { HealthService } from '../services/health.service';
 
+import { SWAGGER_TAGS } from '@/common/constants';
 import { SkipRequestTimeout } from '@/common/decorators';
 import { ApiMessage } from '@/core/api';
 
-@ApiTags('Health')
+@ApiTags(SWAGGER_TAGS.HEALTH)
 @SkipRequestTimeout()
 @Controller({ path: 'health', version: VERSION_NEUTRAL })
 export class HealthController {

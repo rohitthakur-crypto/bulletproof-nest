@@ -1,1 +1,1 @@
-export { UserAuthGuard } from './user-auth.guard';
+export * from './user-auth.guard';

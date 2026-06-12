@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
-import { CurrentUser } from '../decorators/current-user.decorator';
+import { CurrentUser } from '../decorators';
 import {
   AuthTokenResponseDto,
   UserAuthResponseDto,
@@ -11,14 +11,13 @@ import {
 import { UserAuthGuard } from '../guards';
 import type { AuthenticatedUser } from '../interfaces';
 import { UserAuthService } from '../services/user-auth.service';
-import { LoginDto } from '../validators/login.schema';
-import { RefreshDto } from '../validators/refresh.schema';
-import { RegisterDto } from '../validators/register.schema';
+import { LoginDto, RefreshDto, RegisterDto } from '../validators';
 
+import { SWAGGER_TAGS } from '@/common/constants';
 import { ApiVersion } from '@/common/enums';
 import { ApiMessage } from '@/core/api';
 
-@ApiTags('User Auth')
+@ApiTags(SWAGGER_TAGS.USER_AUTH)
 @Controller({ path: 'auth', version: ApiVersion.V1 })
 export class UserAuthController {
   constructor(private readonly userAuthService: UserAuthService) {}

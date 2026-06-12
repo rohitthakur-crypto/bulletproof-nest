@@ -22,7 +22,7 @@ export type { ErrorCode as ErrorCodeType } from './errors/error-code.enum';
 export { errorCodeFromStatus, errorMessageFromStatus } from './errors/status-to-error-code.mapper';
 
 // Envelope builders
-export { buildSuccess, defaultSuccessMessage } from './envelope/success.builder';
+export { buildSuccess } from './envelope/success.builder';
 export { buildError } from './envelope/error.builder';
 
 // HTTP helpers

@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 //////////////////////////////////////////////////////
 //////////////////// ENUMS ///////////////////////////
 //////////////////////////////////////////////////////
@@ -82,6 +81,14 @@ enum SocialAccountStatus {
   REVOKED
 }
 
+enum SocialAccountSyncStatus {
+  PENDING
+  SYNCING
+  ACTIVE
+  FAILED
+  DISCONNECTED
+}
+
 enum AutomationStatus {
   DRAFT
   ACTIVE
@@ -122,37 +129,37 @@ enum MessageType {
 //////////////////////////////////////////////////////
 
 model User {
-  id              String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  name            String
+  name String
 
-  email           String   @unique
+  email String @unique
 
-  avatar          String?
+  avatar String?
 
-  isEmailVerified Boolean  @default(false)
+  isEmailVerified Boolean @default(false)
 
-  lastActiveAt    DateTime?
+  lastActiveAt DateTime?
 
-  createdAt       DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt       DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  credential          UserCredential?
+  credential UserCredential?
 
-  authProviders       UserAuthProviderAccount[]
+  authProviders UserAuthProviderAccount[]
 
-  sessions            UserSession[]
+  sessions UserSession[]
 
-  refreshTokens       UserRefreshToken[]
+  refreshTokens UserRefreshToken[]
 
-  otpCodes            UserOtpCode[]
+  otpCodes UserOtpCode[]
 
   verificationTokens UserVerificationToken[]
 
-  memberships         WorkspaceMember[]
+  memberships WorkspaceMember[]
 
-  createdAutomations  Automation[] @relation("AutomationCreatedBy")
+  createdAutomations Automation[] @relation("AutomationCreatedBy")
 
   @@index([email])
 }
@@ -162,19 +169,19 @@ model User {
 //////////////////////////////////////////////////////
 
 model UserCredential {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  userId            String   @unique @db.Uuid
+  userId String @unique @db.Uuid
 
-  passwordHash      String
+  passwordHash String
 
   passwordChangedAt DateTime?
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt         DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 //////////////////////////////////////////////////////
@@ -182,58 +189,55 @@ model UserCredential {
 //////////////////////////////////////////////////////
 
 model UserSession {
-  id              String         @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  userId          String         @db.Uuid
+  userId String @db.Uuid
 
-  status          SessionStatus  @default(ACTIVE)
+  status SessionStatus @default(ACTIVE)
 
-  deviceId        String
+  deviceId String
 
-  deviceName      String?
+  deviceName String?
 
-  deviceType      DeviceType?
+  deviceType DeviceType?
 
-  platform        DevicePlatform?
+  platform DevicePlatform?
 
-  osVersion       String?
+  osVersion String?
 
-  appVersion      String?
+  appVersion String?
 
-  userAgent       String?
+  userAgent String?
 
-  fcmToken        String?
+  fcmToken String?
 
-  ipAddress       String?
+  ipAddress String?
 
-  country         String?
+  country String?
 
-  region          String?
+  region String?
 
-  city            String?
+  city String?
 
-  loginAt         DateTime       @default(now())
+  loginAt DateTime @default(now())
 
-  lastActivityAt  DateTime?
+  lastActivityAt DateTime?
 
-  expiresAt       DateTime
+  expiresAt DateTime
 
-  revokedAt       DateTime?
+  revokedAt DateTime?
 
-  createdAt       DateTime       @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt       DateTime       @updatedAt
+  updatedAt DateTime @updatedAt
 
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  refreshTokens   UserRefreshToken[]
+  refreshTokens UserRefreshToken[]
 
   @@unique([userId, deviceId])
-
   @@index([userId])
-
   @@index([status])
-
   @@index([expiresAt])
 }
 
@@ -242,34 +246,31 @@ model UserSession {
 //////////////////////////////////////////////////////
 
 model UserRefreshToken {
-  id          String    @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  sessionId   String    @db.Uuid
+  sessionId String @db.Uuid
 
-  userId      String    @db.Uuid
+  userId String @db.Uuid
 
-  tokenFamily String 
+  tokenFamily String
 
-  jti         String    @unique
+  jti String @unique
 
-  tokenHash   String
+  tokenHash String
 
-  status      RefreshTokenStatus @default(ACTIVE)
+  status RefreshTokenStatus @default(ACTIVE)
 
-  expiresAt   DateTime
+  expiresAt DateTime
 
-  createdAt   DateTime  @default(now())
+  createdAt DateTime @default(now())
 
-  session     UserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session UserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
-
   @@index([userId])
-
   @@index([tokenFamily])
-
   @@index([expiresAt])
 }
 
@@ -278,28 +279,26 @@ model UserRefreshToken {
 //////////////////////////////////////////////////////
 
 model UserOtpCode {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  userId            String?  @db.Uuid
+  userId String? @db.Uuid
 
-  email             String
+  email String
 
-  code              String
+  code String
 
-  type              OtpType
+  type OtpType
 
-  expiresAt         DateTime
+  expiresAt DateTime
 
-  verifiedAt        DateTime?
+  verifiedAt DateTime?
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  user              User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([email])
-
   @@index([type])
-
   @@index([expiresAt])
 }
 
@@ -308,28 +307,26 @@ model UserOtpCode {
 //////////////////////////////////////////////////////
 
 model UserVerificationToken {
-  id          String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  userId      String   @db.Uuid
+  userId String @db.Uuid
 
-  type        VerificationTokenType
+  type VerificationTokenType
 
-  tokenHash   String
+  tokenHash String
 
-  expiresAt   DateTime
+  expiresAt DateTime
 
-  usedAt      DateTime?
+  usedAt DateTime?
 
-  metadata    Json?
+  metadata Json?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-
   @@index([type])
-
   @@index([expiresAt])
 }
 
@@ -338,66 +335,63 @@ model UserVerificationToken {
 //////////////////////////////////////////////////////
 
 model UserAuthProviderAccount {
-  id                    String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  userId                String   @db.Uuid
+  userId String @db.Uuid
 
-  provider              AuthProvider
+  provider AuthProvider
 
-  providerId            String
+  providerId String
 
-  accessToken           String?
+  accessToken String?
 
-  refreshToken          String?
+  refreshToken String?
 
-  tokenExpiresAt        DateTime?
+  tokenExpiresAt DateTime?
 
-  scope                 String?
+  scope String?
 
-  idToken               String?
+  idToken String?
 
-  createdAt             DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt             DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  user                  User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-
-  @@index([provider])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerId])
+  @@index([userId])
+  @@index([provider])
 }
-
 
 //////////////////////////////////////////////////////
 //////////////// ADMINS ///////////////////////////////
 //////////////////////////////////////////////////////
 
 model Admin {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  name              String
+  name String
 
-  email             String   @unique
+  email String @unique
 
-  avatar            String?
+  avatar String?
 
-  isActive          Boolean  @default(true)
+  isActive Boolean @default(true)
 
-  lastLoginAt       DateTime?
+  lastLoginAt DateTime?
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt         DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  credential          AdminCredential?
+  credential AdminCredential?
 
-  roles               AdminRoleAssignment[]
+  roles AdminRoleAssignment[]
 
-  sessions            AdminSession[]
+  sessions AdminSession[]
 
-  refreshTokens       AdminRefreshToken[]
+  refreshTokens AdminRefreshToken[]
 
   passwordResetTokens AdminPasswordResetToken[]
 
@@ -409,19 +403,19 @@ model Admin {
 //////////////////////////////////////////////////////
 
 model AdminCredential {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  adminId           String   @unique @db.Uuid
+  adminId String @unique @db.Uuid
 
-  passwordHash      String
+  passwordHash String
 
   passwordChangedAt DateTime?
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt         DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  admin             Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }
 
 //////////////////////////////////////////////////////
@@ -429,21 +423,21 @@ model AdminCredential {
 //////////////////////////////////////////////////////
 
 model AdminRole {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  name              String   @unique
+  name String @unique
 
-  description       String?
+  description String?
 
-  isSystem          Boolean  @default(false)
+  isSystem Boolean @default(false)
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt         DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  permissions       AdminRolePermission[]
+  permissions AdminRolePermission[]
 
-  admins            AdminRoleAssignment[]
+  admins AdminRoleAssignment[]
 }
 
 //////////////////////////////////////////////////////
@@ -451,21 +445,21 @@ model AdminRole {
 //////////////////////////////////////////////////////
 
 model AdminPermission {
-  id          String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  resource    String
+  resource String
 
-  action      String
+  action String
 
-  key         String   @unique
+  key String @unique
 
   description String?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt   DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  roles       AdminRolePermission[]
+  roles AdminRolePermission[]
 
   @@unique([resource, action])
 }
@@ -475,15 +469,15 @@ model AdminPermission {
 //////////////////////////////////////////////////////
 
 model AdminRolePermission {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  roleId            String   @db.Uuid
+  roleId String @db.Uuid
 
-  permissionId      String   @db.Uuid
+  permissionId String @db.Uuid
 
-  role              AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  permission        AdminPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permission AdminPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, permissionId])
 }
@@ -493,17 +487,17 @@ model AdminRolePermission {
 //////////////////////////////////////////////////////
 
 model AdminRoleAssignment {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  adminId           String   @db.Uuid
+  adminId String @db.Uuid
 
-  roleId            String   @db.Uuid
+  roleId String @db.Uuid
 
-  assignedAt        DateTime @default(now())
+  assignedAt DateTime @default(now())
 
-  admin             Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
-  role              AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@unique([adminId, roleId])
 }
@@ -513,58 +507,55 @@ model AdminRoleAssignment {
 //////////////////////////////////////////////////////
 
 model AdminSession {
-  id              String         @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  adminId         String         @db.Uuid
+  adminId String @db.Uuid
 
-  status          SessionStatus  @default(ACTIVE)
+  status SessionStatus @default(ACTIVE)
 
-  deviceId        String
+  deviceId String
 
-  deviceName      String?
+  deviceName String?
 
-  deviceType      DeviceType?
+  deviceType DeviceType?
 
-  platform        DevicePlatform?
+  platform DevicePlatform?
 
-  osVersion       String?
+  osVersion String?
 
-  appVersion      String?
+  appVersion String?
 
-  userAgent       String?
+  userAgent String?
 
-  fcmToken        String?
+  fcmToken String?
 
-  ipAddress       String?
+  ipAddress String?
 
-  country         String?
+  country String?
 
-  region          String?
+  region String?
 
-  city            String?
+  city String?
 
-  loginAt         DateTime       @default(now())
+  loginAt DateTime @default(now())
 
-  lastActivityAt  DateTime?
+  lastActivityAt DateTime?
 
-  expiresAt       DateTime
+  expiresAt DateTime
 
-  revokedAt       DateTime?
+  revokedAt DateTime?
 
-  createdAt       DateTime       @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt       DateTime       @updatedAt
+  updatedAt DateTime @updatedAt
 
-  admin           Admin          @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
-  refreshTokens   AdminRefreshToken[]
+  refreshTokens AdminRefreshToken[]
 
   @@unique([adminId, deviceId])
-
   @@index([adminId])
-
   @@index([status])
-
   @@index([expiresAt])
 }
 
@@ -573,32 +564,30 @@ model AdminSession {
 //////////////////////////////////////////////////////
 
 model AdminRefreshToken {
-  id          String             @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  sessionId   String             @db.Uuid
+  sessionId String @db.Uuid
 
-  adminId     String             @db.Uuid
+  adminId String @db.Uuid
 
   tokenFamily String
 
-  jti         String             @unique
+  jti String @unique
 
-  tokenHash   String
+  tokenHash String
 
-  status      RefreshTokenStatus @default(ACTIVE)
+  status RefreshTokenStatus @default(ACTIVE)
 
-  expiresAt   DateTime
+  expiresAt DateTime
 
-  createdAt   DateTime           @default(now())
+  createdAt DateTime @default(now())
 
-  session     AdminSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session AdminSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  admin       Admin        @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
-
   @@index([adminId])
-
   @@index([expiresAt])
 }
 
@@ -607,22 +596,21 @@ model AdminRefreshToken {
 //////////////////////////////////////////////////////
 
 model AdminPasswordResetToken {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  adminId           String   @db.Uuid
+  adminId String @db.Uuid
 
-  tokenHash         String
+  tokenHash String
 
-  expiresAt         DateTime
+  expiresAt DateTime
 
-  usedAt            DateTime?
+  usedAt DateTime?
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  admin             Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId])
-
   @@index([expiresAt])
 }
 
@@ -631,31 +619,31 @@ model AdminPasswordResetToken {
 //////////////////////////////////////////////////////
 
 model Workspace {
-  id              String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  name            String
+  name String
 
-  slug            String   @unique
+  slug String @unique
 
-  logo            String?
+  logo String?
 
-  createdAt       DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt       DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  members         WorkspaceMember[]
+  members WorkspaceMember[]
 
-  socialAccounts  SocialAccount[]
+  socialAccounts SocialAccount[]
 
-  automations     Automation[]
+  automations Automation[]
 
-  contacts        Contact[]
+  contacts Contact[]
 
-  conversations   Conversation[]
+  conversations Conversation[]
 
-  messages        Message[]
+  messages Message[]
 
-  webhookEvents   WebhookEvent[]
+  webhookEvents WebhookEvent[]
 }
 
 //////////////////////////////////////////////////////
@@ -663,24 +651,23 @@ model Workspace {
 //////////////////////////////////////////////////////
 
 model WorkspaceMember {
-  id              String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  workspaceId     String   @db.Uuid
 
-  userId          String   @db.Uuid
+  workspaceId String @db.Uuid
 
-  role            WorkspaceMemberRole @default(MEMBER)
+  userId String @db.Uuid
 
-  createdAt       DateTime @default(now())
+  role WorkspaceMemberRole @default(MEMBER)
 
-  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
-  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, userId])
-
   @@index([workspaceId])
-
   @@index([userId])
 }
 
@@ -689,104 +676,135 @@ model WorkspaceMember {
 //////////////////////////////////////////////////////
 
 model SocialAccount {
-  id                    String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  workspaceId           String   @db.Uuid
+  workspaceId String @db.Uuid
 
-  platform              SocialPlatform
+  platform SocialPlatform
 
-  status                SocialAccountStatus @default(ACTIVE)
+  externalAccountId String
 
-  accountName           String
+  externalUserId String?
 
-  externalAccountId     String
+  accountName String
 
-  username              String?
+  username String?
 
-  profilePicture        String?
+  profilePicture String?
 
-  accessToken           String
+  status SocialAccountStatus @default(ACTIVE)
 
-  refreshToken          String?
+  metaPageId String?
 
-  tokenExpiresAt        DateTime?
+  metaPageName String?
 
-  metaPageId            String?
+  metadata Json?
 
-  metadata              Json?
+  connectedById String? @db.Uuid
 
-  connectedAt           DateTime @default(now())
+  connectedAt DateTime @default(now())
 
-  lastSyncedAt          DateTime?
+  lastSyncedAt DateTime?
 
-  createdAt             DateTime @default(now())
+  syncStatus SocialAccountSyncStatus @default(PENDING)
 
-  updatedAt             DateTime @updatedAt
+  syncError String?
 
-  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
-  automations           Automation[]
+  updatedAt DateTime @updatedAt
 
-  contacts              Contact[]
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  conversations         Conversation[]
+  credentials SocialCredential?
 
-  messages              Message[]
-
-  @@index([workspaceId])
-
-  @@index([platform])
-
-  @@index([externalAccountId])
+  automations Automation[]
+  contacts Contact[]
+  conversations Conversation[]
+  messages Message[]
 
   @@unique([platform, externalAccountId])
-}
 
+  @@index([workspaceId])
+  @@index([platform])
+  @@index([externalAccountId])
+}
+model SocialCredential {
+  id String @id @default(uuid()) @db.Uuid
+
+  socialAccountId String @unique @db.Uuid
+
+  accessToken String
+
+  refreshToken String?
+
+  tokenType String?
+
+  expiresAt DateTime?
+
+  scopes String[]
+
+  providerUserId String?
+
+  lastRefreshedAt DateTime?
+
+  invalidAt DateTime?
+
+  encrypted Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  socialAccount SocialAccount @relation(fields: [socialAccountId],references: [id],onDelete: Cascade)
+
+  @@index([expiresAt])
+
+  @@index([providerUserId])
+}
 //////////////////////////////////////////////////////
 //////////////// AUTOMATIONS /////////////////////////
 //////////////////////////////////////////////////////
 
 model Automation {
-  id                    String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  workspaceId           String   @db.Uuid
+  workspaceId String @db.Uuid
 
-  socialAccountId       String   @db.Uuid
+  socialAccountId String @db.Uuid
 
-  createdById           String   @db.Uuid
+  createdById String @db.Uuid
 
-  name                  String
+  name String
 
-  description           String?
+  description String?
 
-  status                AutomationStatus @default(DRAFT)
+  status AutomationStatus @default(DRAFT)
 
-  triggerType           AutomationTriggerType
+  triggerType AutomationTriggerType
 
-  triggerConfig         Json
+  triggerConfig Json
 
-  flowData              Json?
+  flowData Json?
 
-  isAiEnabled           Boolean @default(false)
+  isAiEnabled Boolean @default(false)
 
-  publishedAt           DateTime?
+  publishedAt DateTime?
 
-  createdAt             DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt             DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  socialAccount         SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 
-  createdBy             User @relation("AutomationCreatedBy", fields: [createdById], references: [id])
+  createdBy User @relation("AutomationCreatedBy", fields: [createdById], references: [id])
 
-  logs                  AutomationExecution[]
+  logs AutomationExecution[]
 
   @@index([workspaceId])
-
   @@index([socialAccountId])
-
   @@index([status])
 }
 
@@ -795,24 +813,23 @@ model Automation {
 //////////////////////////////////////////////////////
 
 model AutomationExecution {
-  id                    String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  workspaceId           String   @db.Uuid
+  workspaceId String @db.Uuid
 
-  automationId          String   @db.Uuid
+  automationId String @db.Uuid
 
-  triggerPayload        Json?
+  triggerPayload Json?
 
-  status                String
+  status String
 
-  error                 String?
+  error String?
 
-  executedAt            DateTime @default(now())
+  executedAt DateTime @default(now())
 
-  automation            Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
-
   @@index([automationId])
 }
 
@@ -821,42 +838,40 @@ model AutomationExecution {
 //////////////////////////////////////////////////////
 
 model Contact {
-  id                    String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  workspaceId           String   @db.Uuid
+  workspaceId String @db.Uuid
 
-  socialAccountId       String   @db.Uuid
+  socialAccountId String @db.Uuid
 
-  externalContactId     String
+  externalContactId String
 
-  username              String?
+  username String?
 
-  name                  String?
+  name String?
 
-  profilePicture        String?
+  profilePicture String?
 
-  metadata              Json?
+  metadata Json?
 
-  tags                  String[]
+  tags String[]
 
-  lastInteractionAt     DateTime?
+  lastInteractionAt DateTime?
 
-  createdAt             DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt             DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  socialAccount         SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 
-  conversations         Conversation[]
+  conversations Conversation[]
 
-  messages              Message[]
+  messages Message[]
 
   @@index([workspaceId])
-
   @@index([socialAccountId])
-
   @@index([externalContactId])
 }
 
@@ -865,34 +880,32 @@ model Contact {
 //////////////////////////////////////////////////////
 
 model Conversation {
-  id                    String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  workspaceId           String   @db.Uuid
+  workspaceId String @db.Uuid
 
-  socialAccountId       String   @db.Uuid
+  socialAccountId String @db.Uuid
 
-  contactId             String   @db.Uuid
+  contactId String @db.Uuid
 
-  status                ConversationStatus @default(OPEN)
+  status ConversationStatus @default(OPEN)
 
-  lastMessageAt         DateTime?
+  lastMessageAt DateTime?
 
-  createdAt             DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt             DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  socialAccount         SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 
-  contact               Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
-  messages              Message[]
+  messages Message[]
 
   @@index([workspaceId])
-
   @@index([socialAccountId])
-
   @@index([contactId])
 }
 
@@ -901,50 +914,47 @@ model Conversation {
 //////////////////////////////////////////////////////
 
 model Message {
-  id                    String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  workspaceId           String   @db.Uuid
+  workspaceId String @db.Uuid
 
-  socialAccountId       String   @db.Uuid
+  socialAccountId String @db.Uuid
 
-  conversationId        String   @db.Uuid
+  conversationId String @db.Uuid
 
-  contactId             String   @db.Uuid
+  contactId String @db.Uuid
 
-  externalMessageId     String?
+  externalMessageId String?
 
-  direction             MessageDirection
+  direction MessageDirection
 
-  type                  MessageType
+  type MessageType
 
-  content               String?
+  content String?
 
-  attachments           Json?
+  attachments Json?
 
-  metadata              Json?
+  metadata Json?
 
-  sentAt                DateTime?
+  sentAt DateTime?
 
-  deliveredAt           DateTime?
+  deliveredAt DateTime?
 
-  readAt                DateTime?
+  readAt DateTime?
 
-  createdAt             DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  socialAccount         SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 
-  conversation          Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  contact               Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
-
   @@index([conversationId])
-
   @@index([contactId])
-
   @@index([externalMessageId])
 }
 
@@ -953,29 +963,27 @@ model Message {
 //////////////////////////////////////////////////////
 
 model WebhookEvent {
-  id                    String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  workspaceId           String?  @db.Uuid
+  workspaceId String? @db.Uuid
 
-  platform              SocialPlatform
+  platform SocialPlatform
 
-  eventType             String
+  eventType String
 
-  externalEventId       String?
+  externalEventId String?
 
-  payload               Json
+  payload Json
 
-  processed             Boolean @default(false)
+  processed Boolean @default(false)
 
-  processedAt           DateTime?
+  processedAt DateTime?
 
-  createdAt             DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  workspace             Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
-
   @@index([platform])
-
   @@index([processed])
 }

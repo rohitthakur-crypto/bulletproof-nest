@@ -8,6 +8,8 @@ export const JWT_KIDS = {
   ADMIN_REFRESH: 'admin-refresh-v1',
   ADMIN_PASSWORD_RESET: 'admin-password-reset-v1',
   ADMIN_EMAIL_VERIFICATION: 'admin-email-verification-v1',
+
+  META_OAUTH_STATE: 'meta-oauth-state-v1',
 } as const;
 
 export type JwtKid = (typeof JWT_KIDS)[keyof typeof JWT_KIDS];

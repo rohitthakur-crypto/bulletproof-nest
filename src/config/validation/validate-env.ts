@@ -1,17 +1,23 @@
-import { envSchema } from './env.schema';
+import z from 'zod';
 
-export function validateEnv(config: Record<string, unknown>) {
+import type { Env } from '../schemas';
+import { envSchema } from '../schemas';
+
+let cached: Env | null = null;
+
+export function validateEnv(config: Record<string, unknown>): Env {
   const result = envSchema.safeParse(config);
 
   if (!result.success) {
-    console.error('Invalid environment variables', result.error.format());
-
+    console.error('Invalid environment variables', z.treeifyError(result.error));
     throw new Error('Environment validation failed');
   }
 
-  return result.data;
+  cached = result.data;
+  return cached;
 }
 
-export function env(): ReturnType<typeof validateEnv> {
-  return validateEnv(process.env);
+export function getValidatedEnv(): Env {
+  if (!cached) cached = validateEnv(process.env);
+  return cached;
 }

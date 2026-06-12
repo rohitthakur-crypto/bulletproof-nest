@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 
 import { UsersCacheService } from './cache/users-cache.service';
 import { UserProfileController } from './controllers/user-profile.controller';
-import { UsersRepository } from './repositories/users.repository';
+import { UsersRepository } from './repositories';
 import { UserProfileService } from './services/user-profile.service';
 import { UsersService } from './services/users.service';
 

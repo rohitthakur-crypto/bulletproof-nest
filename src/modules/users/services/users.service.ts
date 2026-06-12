@@ -2,9 +2,8 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import type { User } from '@prisma/client';
 
 import { UsersCacheService } from '../cache/users-cache.service';
-import type { CreateUserInput } from '../dto/create-user.dto';
-import type { UpdateUserInput } from '../dto/update-user.dto';
-import { UsersRepository } from '../repositories/users.repository';
+import type { CreateUserInput, UpdateUserInput } from '../dto';
+import { UsersRepository } from '../repositories';
 
 @Injectable()
 export class UsersService {
