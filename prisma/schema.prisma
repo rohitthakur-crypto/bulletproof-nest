@@ -65,13 +65,14 @@ enum WorkspaceMemberRole {
   MEMBER
 }
 
+enum SocialProvider {
+  META
+}
+
 enum SocialPlatform {
   INSTAGRAM
   FACEBOOK
   WHATSAPP
-  TELEGRAM
-  TIKTOK
-  WEBCHAT
 }
 
 enum SocialAccountStatus {
@@ -101,6 +102,9 @@ enum AutomationTriggerType {
   DM_KEYWORD
   STORY_MENTION
   WEBHOOK
+  COMMENT_CREATED
+  MESSAGE_RECEIVED
+  MENTION_CREATED
   MANUAL
 }
 
@@ -619,61 +623,42 @@ model AdminPasswordResetToken {
 //////////////////////////////////////////////////////
 
 model Workspace {
-  id String @id @default(uuid()) @db.Uuid
-
-  name String
-
-  slug String @unique
-
-  logo String?
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  logo      String?
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
-  members WorkspaceMember[]
-
+  members   WorkspaceMember[]
   socialAccounts SocialAccount[]
-
   automations Automation[]
-
-  contacts Contact[]
-
-  conversations Conversation[]
-
-  messages Message[]
-
   webhookEvents WebhookEvent[]
+
+  @@index([slug])
 }
 
 //////////////////////////////////////////////////////
-//////////////// WORKSPACE MEMBERS ///////////////////
+//////////////////// WORKSPACE MEMBERS ///////////////
 //////////////////////////////////////////////////////
 
 model WorkspaceMember {
-  id String @id @default(uuid()) @db.Uuid
+  id           String @id @default(uuid()) @db.Uuid
 
-
-  workspaceId String @db.Uuid
-
-  userId String @db.Uuid
+  workspaceId  String @db.Uuid
+  userId       String @db.Uuid
 
   role WorkspaceMemberRole @default(MEMBER)
 
   createdAt DateTime @default(now())
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, userId])
   @@index([workspaceId])
-  @@index([userId])
 }
-
-//////////////////////////////////////////////////////
-//////////////// SOCIAL ACCOUNTS /////////////////////
-//////////////////////////////////////////////////////
 
 model SocialAccount {
   id String @id @default(uuid()) @db.Uuid
@@ -682,53 +667,38 @@ model SocialAccount {
 
   platform SocialPlatform
 
-  externalAccountId String
+  platformAccountId String // pageId / igId / waId
 
-  externalUserId String?
+  metaPageId String?
 
-  accountName String
-
-  username String?
-
+  accountName    String
+  username       String?
   profilePicture String?
 
   status SocialAccountStatus @default(ACTIVE)
 
-  metaPageId String?
-
-  metaPageName String?
-
   metadata Json?
 
-  connectedById String? @db.Uuid
-
-  connectedAt DateTime @default(now())
-
-  lastSyncedAt DateTime?
-
-  syncStatus SocialAccountSyncStatus @default(PENDING)
-
-  syncError String?
-
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace  Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  credentials SocialCredential?
-
-  automations Automation[]
-  contacts Contact[]
+  credentials   SocialCredential?
+  automations   Automation[]
+  contacts      Contact[]
   conversations Conversation[]
-  messages Message[]
+  messages      Message[]
+  webhookEvents WebhookEvent[]
 
-  @@unique([platform, externalAccountId])
-
+  @@unique([workspaceId, platform, platformAccountId])
   @@index([workspaceId])
-  @@index([platform])
-  @@index([externalAccountId])
 }
+
+//////////////////////////////////////////////////////
+//////////////////// SOCIAL CREDENTIALS //////////////
+//////////////////////////////////////////////////////
+
 model SocialCredential {
   id String @id @default(uuid()) @db.Uuid
 
@@ -736,32 +706,107 @@ model SocialCredential {
 
   accessToken String
 
-  refreshToken String?
-
-  tokenType String?
-
   expiresAt DateTime?
 
-  scopes String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  providerUserId String?
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 
-  lastRefreshedAt DateTime?
+  @@index([socialAccountId])
+  @@index([expiresAt])
+}
 
-  invalidAt DateTime?
+//////////////////////////////////////////////////////
+//////////////////// CONTACTS ////////////////////////
+//////////////////////////////////////////////////////
 
-  encrypted Boolean @default(true)
+model Contact {
+  id String @id @default(uuid()) @db.Uuid
+
+  socialAccountId String @db.Uuid
+
+  externalContactId String
+
+  name String?
+  username String?
+  profilePicture String?
+
+  tags String[]
+  metadata Json?
+
+  lastInteractionAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  conversations Conversation[]
+  messages      Message[]
+
+  @@index([socialAccountId, externalContactId])
+}
+
+//////////////////////////////////////////////////////
+//////////////// CONVERSATIONS ///////////////////////
+//////////////////////////////////////////////////////
+
+model Conversation {
+  id String @id @default(uuid()) @db.Uuid
+
+  socialAccountId String @db.Uuid
+  contactId       String @db.Uuid
+
+  status ConversationStatus @default(OPEN)
+
+  lastMessageAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  contact       Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  @@index([socialAccountId, contactId])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// MESSAGES ////////////////////////
+//////////////////////////////////////////////////////
+
+model Message {
+  id String @id @default(uuid()) @db.Uuid
+
+  socialAccountId String @db.Uuid
+  conversationId  String @db.Uuid
+  contactId       String @db.Uuid
+
+  externalMessageId String?
+
+  direction MessageDirection
+  type      MessageType
+
+  content     String?
+  attachments Json?
+  metadata    Json?
+
+  sentAt DateTime?
 
   createdAt DateTime @default(now())
 
-  updatedAt DateTime @updatedAt
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  conversation  Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  contact       Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
-  socialAccount SocialAccount @relation(fields: [socialAccountId],references: [id],onDelete: Cascade)
-
-  @@index([expiresAt])
-
-  @@index([providerUserId])
+  @@index([conversationId, createdAt])
+  @@index([externalMessageId])
 }
+
+
+
 //////////////////////////////////////////////////////
 //////////////// AUTOMATIONS /////////////////////////
 //////////////////////////////////////////////////////
@@ -770,19 +815,15 @@ model Automation {
   id String @id @default(uuid()) @db.Uuid
 
   workspaceId String @db.Uuid
-
   socialAccountId String @db.Uuid
-
   createdById String @db.Uuid
 
   name String
-
   description String?
 
   status AutomationStatus @default(DRAFT)
 
   triggerType AutomationTriggerType
-
   triggerConfig Json
 
   flowData Json?
@@ -792,20 +833,16 @@ model Automation {
   publishedAt DateTime?
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
   socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 
   createdBy User @relation("AutomationCreatedBy", fields: [createdById], references: [id])
 
-  logs AutomationExecution[]
+  executions AutomationExecution[]
 
-  @@index([workspaceId])
-  @@index([socialAccountId])
-  @@index([status])
+  @@index([socialAccountId, status])
 }
 
 //////////////////////////////////////////////////////
@@ -816,7 +853,6 @@ model AutomationExecution {
   id String @id @default(uuid()) @db.Uuid
 
   workspaceId String @db.Uuid
-
   automationId String @db.Uuid
 
   triggerPayload Json?
@@ -829,161 +865,35 @@ model AutomationExecution {
 
   automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
 
-  @@index([workspaceId])
   @@index([automationId])
 }
 
 //////////////////////////////////////////////////////
-//////////////////// CONTACTS ////////////////////////
-//////////////////////////////////////////////////////
-
-model Contact {
-  id String @id @default(uuid()) @db.Uuid
-
-  workspaceId String @db.Uuid
-
-  socialAccountId String @db.Uuid
-
-  externalContactId String
-
-  username String?
-
-  name String?
-
-  profilePicture String?
-
-  metadata Json?
-
-  tags String[]
-
-  lastInteractionAt DateTime?
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
-
-  conversations Conversation[]
-
-  messages Message[]
-
-  @@index([workspaceId])
-  @@index([socialAccountId])
-  @@index([externalContactId])
-}
-
-//////////////////////////////////////////////////////
-//////////////// CONVERSATIONS ///////////////////////
-//////////////////////////////////////////////////////
-
-model Conversation {
-  id String @id @default(uuid()) @db.Uuid
-
-  workspaceId String @db.Uuid
-
-  socialAccountId String @db.Uuid
-
-  contactId String @db.Uuid
-
-  status ConversationStatus @default(OPEN)
-
-  lastMessageAt DateTime?
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
-
-  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
-
-  messages Message[]
-
-  @@index([workspaceId])
-  @@index([socialAccountId])
-  @@index([contactId])
-}
-
-//////////////////////////////////////////////////////
-//////////////////// MESSAGES ////////////////////////
-//////////////////////////////////////////////////////
-
-model Message {
-  id String @id @default(uuid()) @db.Uuid
-
-  workspaceId String @db.Uuid
-
-  socialAccountId String @db.Uuid
-
-  conversationId String @db.Uuid
-
-  contactId String @db.Uuid
-
-  externalMessageId String?
-
-  direction MessageDirection
-
-  type MessageType
-
-  content String?
-
-  attachments Json?
-
-  metadata Json?
-
-  sentAt DateTime?
-
-  deliveredAt DateTime?
-
-  readAt DateTime?
-
-  createdAt DateTime @default(now())
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
-
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@index([conversationId])
-  @@index([contactId])
-  @@index([externalMessageId])
-}
-
-//////////////////////////////////////////////////////
-//////////////// WEBHOOK EVENTS //////////////////////
+//////////////////// WEBHOOK EVENTS //////////////////
 //////////////////////////////////////////////////////
 
 model WebhookEvent {
   id String @id @default(uuid()) @db.Uuid
 
-  workspaceId String? @db.Uuid
+  workspaceId String @db.Uuid
+  socialAccountId String @db.Uuid
 
   platform SocialPlatform
 
   eventType String
-
   externalEventId String?
 
   payload Json
 
-  processed Boolean @default(false)
+  status String @default("PENDING")
 
   processedAt DateTime?
 
   createdAt DateTime @default(now())
 
-  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 
-  @@index([workspaceId])
-  @@index([platform])
-  @@index([processed])
+  @@unique([socialAccountId, externalEventId])
+  @@index([status])
 }

@@ -14,3 +14,12 @@ export const paginationQuerySchema = z
 export type PaginationQueryInput = z.infer<typeof paginationQuerySchema>;
 
 export class PaginationQueryDto extends createZodDto(paginationQuerySchema) {}
+
+export const paginationMetaSchema = z.object({
+  page: z.number(),
+  limit: z.number(),
+  total: z.number(),
+  totalPages: z.number(),
+});
+
+export type PaginationMeta = z.infer<typeof paginationMetaSchema>;

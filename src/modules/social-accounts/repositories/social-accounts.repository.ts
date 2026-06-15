@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma, SocialAccount } from '@prisma/client';
+import type { Prisma, SocialAccount, SocialPlatform } from '@prisma/client';
+
+import type { ListSocialAccountsFilters } from '../validators';
 
 import { BasePrismaRepository, PrismaService } from '@/infra/prisma';
+import type { PrismaOffsetArgs } from '@/infra/prisma';
 
 @Injectable()
 export class SocialAccountsRepository extends BasePrismaRepository {
@@ -11,6 +14,46 @@ export class SocialAccountsRepository extends BasePrismaRepository {
 
   async findById(id: string): Promise<SocialAccount | null> {
     return this.db.socialAccount.findUnique({ where: { id } });
+  }
+
+  async findByIdAndWorkspace(id: string, workspaceId: string): Promise<SocialAccount | null> {
+    return this.db.socialAccount.findFirst({
+      where: { id, workspaceId },
+    });
+  }
+
+  async findByWorkspacePlatformAccountId(
+    workspaceId: string,
+    platform: SocialPlatform,
+    platformAccountId: string,
+  ): Promise<SocialAccount | null> {
+    return this.db.socialAccount.findUnique({
+      where: {
+        workspaceId_platform_platformAccountId: {
+          workspaceId,
+          platform,
+          platformAccountId,
+        },
+      },
+    });
+  }
+
+  async findManyByWorkspace(
+    filters: ListSocialAccountsFilters,
+    pagination: PrismaOffsetArgs,
+  ): Promise<SocialAccount[]> {
+    return this.db.socialAccount.findMany({
+      where: this.buildListWhere(filters),
+      orderBy: [{ createdAt: 'desc' }],
+      skip: pagination.skip,
+      take: pagination.take,
+    });
+  }
+
+  async countByWorkspace(filters: ListSocialAccountsFilters): Promise<number> {
+    return this.db.socialAccount.count({
+      where: this.buildListWhere(filters),
+    });
   }
 
   async create(data: Prisma.SocialAccountCreateInput): Promise<SocialAccount> {
@@ -23,5 +66,21 @@ export class SocialAccountsRepository extends BasePrismaRepository {
 
   async delete(id: string): Promise<SocialAccount> {
     return this.db.socialAccount.delete({ where: { id } });
+  }
+
+  private buildListWhere(filters: ListSocialAccountsFilters): Prisma.SocialAccountWhereInput {
+    const search = filters.search?.trim();
+
+    return {
+      workspaceId: filters.workspaceId,
+      ...(filters.platform && { platform: filters.platform }),
+      ...(filters.status && { status: filters.status }),
+      ...(search && {
+        OR: [
+          { accountName: { contains: search, mode: 'insensitive' } },
+          { username: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
+    };
   }
 }

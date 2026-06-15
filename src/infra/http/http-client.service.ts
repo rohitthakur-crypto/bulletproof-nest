@@ -1,13 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 
+import type { RequestOptionsWithoutMethod } from './http.types';
 import type { HttpRequestOptions } from './interfaces';
 
 import { HTTP_STATUS_OK_MAX_EXCLUSIVE, HTTP_STATUS_OK_MIN } from '@/common/constants';
 import { HttpMethod } from '@/common/enums';
 import { AppConfigService } from '@/config';
-
-type RequestOptionsWithoutMethod<TBody> = Omit<HttpRequestOptions<TBody>, 'method'>;
 
 @Injectable()
 export class HttpClientService {
@@ -25,6 +24,7 @@ export class HttpClientService {
   async request<TResponse, TBody = unknown>(
     options: HttpRequestOptions<TBody>,
   ): Promise<TResponse> {
+    console.log('options', options);
     try {
       const { data } = await this.client.request<TResponse>({
         url: options.url,

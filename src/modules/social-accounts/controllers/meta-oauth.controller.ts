@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swa
 import { WorkspaceMemberRole } from '@prisma/client';
 import type { FastifyReply } from 'fastify';
 
-import { MetaPageResponse, MetaPageResponseDto } from '../dto';
+import { ConnectableAssetResponse, ConnectableAssetResponseDto } from '../dto';
 import { MetaService } from '../services/meta.service';
 import { MetaOAuthCallbackQueryDto } from '../validators';
 
@@ -44,15 +44,15 @@ export class MetaOauthController {
     return reply.redirect(redirectUrl, 302);
   }
 
-  @Get('meta/pages')
+  @Get('available-accounts')
   @UseGuards(UserAuthGuard, WorkspaceMemberGuard, WorkspaceRolesGuard)
   @WorkspaceRoles(WorkspaceMemberRole.OWNER)
-  @ApiOperation({ summary: 'Get Meta pages' })
-  @ApiOkResponse({ description: 'Meta pages', type: Array<MetaPageResponseDto> })
-  async getMetaPages(
+  @ApiOperation({ summary: 'List Meta assets (pages with linked Instagram)' })
+  @ApiOkResponse({ description: 'Meta connectable assets', type: ConnectableAssetResponseDto })
+  async getMetaAssets(
     @CurrentUser() user: AuthenticatedUser,
     @CurrentWorkspace() workspaceId: string,
-  ): Promise<Array<MetaPageResponse>> {
-    return this.metaService.getMetaPages(user, workspaceId);
+  ): Promise<ConnectableAssetResponse[]> {
+    return this.metaService.listMetaAssets(user, workspaceId);
   }
 }

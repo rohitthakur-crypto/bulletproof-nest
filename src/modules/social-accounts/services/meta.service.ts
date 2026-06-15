@@ -8,13 +8,14 @@ import {
   META_GRAPH_OAUTH_ACCESS_TOKEN_PATH,
   META_GRAPH_OAUTH_PATH,
 } from '../constants';
-import { MetaPageResponse } from '../dto';
+import { ConnectableAssetResponse } from '../dto';
 import type {
   MetaAccessTokenResponse,
+  MetaAsset,
   MetaOAuthSession,
-  MetaGraphPagesResponse,
+  MetaAssetsResponse,
 } from '../interfaces';
-import { mapMetaGraphPageToMetaPage } from '../mappers/meta-grpah-page.mapper';
+import { toConnectableAssets } from '../mappers';
 import { MetaOAuthCallbackQuery } from '../validators';
 
 import { AuthActorType, HttpMethod } from '@/common/enums';
@@ -51,6 +52,7 @@ export class MetaService {
       response_type: 'code',
       state,
       scope: uniqueScopes.join(','),
+      auth_type: 'rerequest',
     });
 
     return `${this.getFacebookBaseUrl()}/${META_GRAPH_OAUTH_PATH}?${params.toString()}`;
@@ -90,25 +92,38 @@ export class MetaService {
     }
   }
 
-  public async getMetaPages(
+  public async listMetaAssets(
     user: AuthenticatedUser,
     workspaceId: string,
-  ): Promise<Array<MetaPageResponse>> {
-    const metaOAuthSession = await this.getMetaOAuthSession(user.sessionId);
+  ): Promise<ConnectableAssetResponse[]> {
+    const assets = await this.resolveMetaAssetsForConnect(user, workspaceId);
 
-    if (!metaOAuthSession) {
-      throw new NotFoundException('Meta OAuth session not found');
-    }
+    return toConnectableAssets({ data: assets });
+  }
 
-    if (metaOAuthSession.workspaceId !== workspaceId) {
+  public async resolveMetaAssetsForConnect(
+    user: AuthenticatedUser,
+    workspaceId: string,
+  ): Promise<MetaAsset[]> {
+    const session = await this.requireMetaOAuthSession(user.sessionId, workspaceId);
+    const response = await this.fetchMetaAssets(session.accessToken);
+
+    return response.data;
+  }
+
+  private async requireMetaOAuthSession(
+    sessionId: string,
+    workspaceId: string,
+  ): Promise<MetaOAuthSession> {
+    const session = await this.getMetaOAuthSession(sessionId);
+
+    if (session.workspaceId !== workspaceId) {
       throw new BadRequestException(
         'Meta OAuth session workspace does not match the requested workspace',
       );
     }
 
-    const pages = await this.getPages(metaOAuthSession.accessToken);
-
-    return pages.data.map(mapMetaGraphPageToMetaPage);
+    return session;
   }
 
   private getGraphBaseUrl(): string {
@@ -199,17 +214,16 @@ export class MetaService {
     };
   }
 
-  private async getPages(accessToken: string): Promise<MetaGraphPagesResponse> {
-    const response = await this.http.request<MetaGraphPagesResponse>({
+  private async fetchMetaAssets(accessToken: string): Promise<MetaAssetsResponse> {
+    return this.http.request<MetaAssetsResponse>({
       method: HttpMethod.GET,
       baseURL: this.getGraphBaseUrl(),
       url: META_GRAPH_ME_ACCOUNTS_PATH,
       params: {
-        fields: 'id,name,picture.type(large),cover,access_token',
+        fields:
+          'id,name,picture.type(large),access_token,instagram_business_account{id,username,name,profile_picture_url}',
       },
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-
-    return response;
   }
 }
