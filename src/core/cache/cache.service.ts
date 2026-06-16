@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { CACHE_TTL, type CacheTtl } from './cache.constants';
 import type { CacheSetManyEntry } from './cache.types';
 
-import { AppConfigService } from '@/config';
+import { AppConfigService } from '@/core/config';
 import { RedisService } from '@/infra/redis';
 
 const LOCK_TTL_SECONDS = 10;

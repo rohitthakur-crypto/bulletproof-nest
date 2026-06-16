@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 import { ENCRYPTION_ALGORITHM, IV_LENGTH } from './encryption.constants';
 
-import { AppConfigService } from '@/config';
+import { AppConfigService } from '@/core/config';
 
 @Injectable()
 export class EncryptionService {

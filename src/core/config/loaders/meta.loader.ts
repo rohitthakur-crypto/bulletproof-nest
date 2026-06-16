@@ -33,6 +33,7 @@ export const metaConfig = registerAs('meta', (): MetaConfig => {
     webhook: {
       verifyToken: e.META_WEBHOOK_VERIFY_TOKEN,
       path: e.META_WEBHOOK_PATH,
+      subscribedFields: e.META_WEBHOOK_SUBSCRIBED_FIELDS,
     },
 
     whatsapp: {

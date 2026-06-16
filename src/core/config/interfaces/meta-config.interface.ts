@@ -23,6 +23,7 @@ export interface MetaOAuthConfig {
 export interface MetaWebhookConfig {
   readonly verifyToken: string;
   readonly path: string;
+  readonly subscribedFields: string[];
 }
 
 export interface MetaWhatsAppConfig {

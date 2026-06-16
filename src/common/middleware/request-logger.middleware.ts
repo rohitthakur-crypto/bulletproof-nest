@@ -6,7 +6,7 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import { resolveIncomingMessage, resolveRequestId, resolveServerResponse } from '@/common/utils';
-import { AppConfigService } from '@/config';
+import { AppConfigService } from '@/core/config';
 import {
   LogLevel,
   buildHttpAccessLog,
@@ -72,11 +72,11 @@ export class RequestLoggerMiddleware implements NestMiddleware {
       const message = formatHttpAccessMessage(payload);
 
       switch (level) {
-        case LogLevel.Error:
+        case LogLevel.ERROR:
           log.error(payload, message);
           break;
 
-        case LogLevel.Warn:
+        case LogLevel.WARN:
           log.warn(payload, message);
           break;
 

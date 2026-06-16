@@ -5,7 +5,7 @@ import { withTransaction } from './helpers/transaction.helper';
 import { createExtendedPrismaClient, type ExtendedPrismaClient } from './prisma.extension';
 import type { TransactionCallback, TransactionOptions } from './prisma.types';
 
-import { AppConfigService } from '@/config';
+import { AppConfigService } from '@/core/config';
 
 @Injectable()
 export class PrismaService implements OnModuleInit, OnModuleDestroy {

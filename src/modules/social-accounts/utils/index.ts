@@ -1,1 +1,1 @@
-export * from './meta-social-account.util';
+// Meta page connect utilities have moved to @/modules/integrations/utils

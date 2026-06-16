@@ -39,5 +39,10 @@ export const metaEnvSchema = z.object({
 
   META_WEBHOOK_PATH: z.string().min(1).default('webhooks/meta'),
 
+  META_WEBHOOK_SUBSCRIBED_FIELDS: z
+    .string()
+    .default('messages,messaging_postbacks,message_echoes,messaging_optins,message_reads,feed')
+    .transform(parseCommaSeparated),
+
   META_WHATSAPP_CONFIG_ID: z.string().default(''),
 });

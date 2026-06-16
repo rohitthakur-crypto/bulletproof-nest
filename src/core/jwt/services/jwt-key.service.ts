@@ -5,8 +5,8 @@ import { TokenType } from '../enums/token.enum';
 import { JwtKeyPair } from '../interfaces/jwt-key-pair.interface';
 
 import { AuthActorType } from '@/common/enums';
-import { AppConfigService } from '@/config';
-import type { JwtKeyPairConfig } from '@/config/interfaces';
+import { AppConfigService } from '@/core/config';
+import type { JwtKeyPairConfig } from '@/core/config/interfaces';
 
 @Injectable()
 export class JwtKeyService {

@@ -1,1 +1,1 @@
-export * from './social-account.cache.service';
+// Meta OAuth cache has moved to @/modules/integrations/cache

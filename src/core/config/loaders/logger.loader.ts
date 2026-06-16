@@ -13,7 +13,7 @@ export const loggerConfig = registerAs('logger', (): LoggerConfig => {
   const isDev = DEV_ENVIRONMENTS.has(e.NODE_ENV);
 
   return {
-    level: e.LOG_LEVEL ?? (isDev ? LogLevel.Debug : LogLevel.Info),
+    level: e.LOG_LEVEL ?? (isDev ? LogLevel.DEBUG : LogLevel.INFO),
     pretty: e.LOG_PRETTY ?? isDev,
     autoLogging: e.LOG_HTTP_AUTO ?? true,
   };

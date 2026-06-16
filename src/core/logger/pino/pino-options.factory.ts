@@ -13,7 +13,7 @@ import {
 } from '../logger.constants';
 import { resolveClientIp } from '../utils/http-access-log.util';
 
-import type { AppConfig, LoggerConfig } from '@/config/interfaces';
+import type { AppConfig, LoggerConfig } from '@/core/config/interfaces';
 
 function resolveIncomingId(value: string | string[] | undefined): string | undefined {
   if (value === undefined) {

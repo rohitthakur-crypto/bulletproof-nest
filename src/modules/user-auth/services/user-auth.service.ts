@@ -15,7 +15,7 @@ import { UserTokenService } from './user-token.service';
 
 import { AuthActorType } from '@/common/enums';
 import { hashToken, toDate } from '@/common/utils';
-import { AppConfigService } from '@/config';
+import { AppConfigService } from '@/core/config';
 import { TokenType } from '@/core/jwt';
 import { AppLoggerService } from '@/core/logger';
 import { toUserResponse } from '@/modules/users/mappers/user-response.mapper';

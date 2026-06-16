@@ -4,7 +4,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { AppModule } from './app.module';
 
 import { configureApplication } from '@/bootstrap';
-import { AppConfigService } from '@/config';
+import { AppConfigService } from '@/core/config';
 import { PrismaService } from '@/infra/prisma';
 
 async function bootstrap() {

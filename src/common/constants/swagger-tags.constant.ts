@@ -3,8 +3,9 @@ export const SWAGGER_TAGS = {
   USER_AUTH: 'User Auth',
   USERS: 'Users',
   WORKSPACES: 'Workspaces',
-  META_OAUTH: 'Meta OAuth',
+  META: 'Meta',
   SOCIAL_ACCOUNTS: 'Social Accounts',
+  WEBHOOKS: 'Webhooks',
 } as const;
 
 export type SwaggerTag = (typeof SWAGGER_TAGS)[keyof typeof SWAGGER_TAGS];
@@ -14,8 +15,9 @@ export const SWAGGER_TAG_DESCRIPTIONS: Readonly<Record<SwaggerTag, string>> = {
   [SWAGGER_TAGS.USER_AUTH]: 'Registration, login, and token management',
   [SWAGGER_TAGS.USERS]: 'User profile and account',
   [SWAGGER_TAGS.WORKSPACES]: 'Workspace management',
-  [SWAGGER_TAGS.META_OAUTH]: 'Meta / Facebook OAuth integration',
+  [SWAGGER_TAGS.META]: 'Meta / Facebook OAuth and page management',
   [SWAGGER_TAGS.SOCIAL_ACCOUNTS]: 'Social accounts management',
+  [SWAGGER_TAGS.WEBHOOKS]: 'Meta real-time webhook ingress',
 };
 
 export const SWAGGER_TAG_ORDER: readonly SwaggerTag[] = [
@@ -23,6 +25,7 @@ export const SWAGGER_TAG_ORDER: readonly SwaggerTag[] = [
   SWAGGER_TAGS.USER_AUTH,
   SWAGGER_TAGS.USERS,
   SWAGGER_TAGS.WORKSPACES,
-  SWAGGER_TAGS.META_OAUTH,
+  SWAGGER_TAGS.META,
   SWAGGER_TAGS.SOCIAL_ACCOUNTS,
+  SWAGGER_TAGS.WEBHOOKS,
 ];

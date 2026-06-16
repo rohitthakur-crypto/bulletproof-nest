@@ -6,7 +6,7 @@ import type { HttpRequestOptions } from './interfaces';
 
 import { HTTP_STATUS_OK_MAX_EXCLUSIVE, HTTP_STATUS_OK_MIN } from '@/common/constants';
 import { HttpMethod } from '@/common/enums';
-import { AppConfigService } from '@/config';
+import { AppConfigService } from '@/core/config';
 
 @Injectable()
 export class HttpClientService {
@@ -41,6 +41,7 @@ export class HttpClientService {
 
       return data;
     } catch (error) {
+      console.log('error', error);
       this.logRequestError(error, options);
       throw error;
     }

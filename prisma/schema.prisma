@@ -677,6 +677,10 @@ model SocialAccount {
 
   status SocialAccountStatus @default(ACTIVE)
 
+  webhookSubscribed   Boolean   @default(false)
+  webhookSubscribedAt DateTime?
+  webhookFields       String[]  @default([])
+
   metadata Json?
 
   createdAt DateTime @default(now())

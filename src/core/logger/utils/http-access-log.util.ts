@@ -45,14 +45,14 @@ export function shouldExcludeHttpLog(url: string | undefined): boolean {
 
 export function resolveHttpLogLevel(statusCode: number, hasError = false): LogLevel {
   if (hasError || statusCode >= 500) {
-    return LogLevel.Error;
+    return LogLevel.ERROR;
   }
 
   if (statusCode >= 400) {
-    return LogLevel.Warn;
+    return LogLevel.WARN;
   }
 
-  return LogLevel.Info;
+  return LogLevel.INFO;
 }
 
 export function buildHttpAccessLog(input: {

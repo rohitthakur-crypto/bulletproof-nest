@@ -1,41 +1,43 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { SocialAccountStatus, type Prisma } from '@prisma/client';
 
 import type { PaginatedSocialAccountsResponse, SocialAccountResponse } from '../dto';
-import type { SocialAccountConnectResult, SocialAccountUpsertPayload } from '../interfaces';
+import type {
+  CreateSocialAccountsConnectResponse,
+  SocialAccountConnectFailure,
+  SocialAccountConnectResult,
+  SocialAccountUpsertPayload,
+} from '../interfaces';
 import { toSocialAccountResponse } from '../mappers/social-account.mapper';
 import { SocialAccountsRepository, SocialCredentialsRepository } from '../repositories';
-import { buildMetaSocialAccountPayloads, findMetaPageById } from '../utils';
 import type {
   CreateSocialAccountsType,
   GetSocialAccountsQuery,
   ListSocialAccountsFilters,
 } from '../validators';
 
-import { MetaService } from './meta.service';
-
 import { EncryptionService } from '@/core/security/encryption';
 import { buildOffsetPaginationMeta, toPrismaOffset } from '@/infra/prisma';
+import type { MetaPageConnectData } from '@/modules/integrations/interfaces';
+import { MetaConnectService } from '@/modules/integrations/services';
 import type { AuthenticatedUser } from '@/modules/user-auth/interfaces';
 
 @Injectable()
 export class SocialAccountsService {
   constructor(
-    private readonly metaService: MetaService,
+    private readonly metaConnectService: MetaConnectService,
     private readonly socialAccountRepo: SocialAccountsRepository,
     private readonly socialCredentialsRepo: SocialCredentialsRepository,
     private readonly encryptionService: EncryptionService,
   ) {}
 
+  // ─── Public ───────────────────────────────────────────────────────────────────
+
   public async listSocialAccounts(
     workspaceId: string,
     query: GetSocialAccountsQuery,
   ): Promise<PaginatedSocialAccountsResponse> {
-    const filters: ListSocialAccountsFilters = {
-      workspaceId,
-      ...query,
-    };
-
+    const filters: ListSocialAccountsFilters = { workspaceId, ...query };
     const pagination = toPrismaOffset({ page: query.page, limit: query.limit });
 
     const [accounts, total] = await Promise.all([
@@ -62,47 +64,75 @@ export class SocialAccountsService {
     return toSocialAccountResponse(account);
   }
 
+  /**
+   * Validates the Meta OAuth session, subscribes each selected page to
+   * webhooks, and persists the resulting social accounts.  Returns a
+   * partial-success response so the client knows which pages connected and
+   * which failed.
+   */
   public async createSocialAccount(
     user: AuthenticatedUser,
     workspaceId: string,
     selections: CreateSocialAccountsType,
-  ): Promise<SocialAccountConnectResult[]> {
-    const metaPages = await this.metaService.resolveMetaAssetsForConnect(user, workspaceId);
-    const results: SocialAccountConnectResult[] = [];
+  ): Promise<CreateSocialAccountsConnectResponse> {
+    const { payloads, failures: connectFailures } =
+      await this.metaConnectService.buildConnectPayloads(user, workspaceId, selections);
 
-    for (const selection of selections) {
-      const page = findMetaPageById(metaPages, selection.pageId);
-      const payloads = buildMetaSocialAccountPayloads(page, selection);
+    const connected: SocialAccountConnectResult[] = [];
+    const failed: SocialAccountConnectFailure[] = connectFailures.map((f) => ({ ...f }));
 
-      for (const payload of payloads) {
-        results.push(await this.upsertSocialAccount(workspaceId, payload));
+    for (const data of payloads) {
+      try {
+        connected.push(await this.persistSocialAccount(workspaceId, data));
+      } catch (error) {
+        failed.push({
+          pageId: data.metaPageId,
+          reason: 'persist_failed',
+          message: error instanceof Error ? error.message : 'Failed to save social account',
+        });
       }
     }
 
-    return results;
+    if (connected.length === 0) {
+      throw new BadRequestException({
+        message: 'Failed to connect any of the selected social accounts',
+        failed,
+      });
+    }
+
+    await this.metaConnectService.clearConnectSession(user.sessionId, workspaceId);
+
+    return { connected, failed };
   }
 
-  private async upsertSocialAccount(
+  // ─── Private ──────────────────────────────────────────────────────────────────
+
+  /**
+   * Upserts a social account and its encrypted credential.
+   * Maps MetaPageConnectData (from integrations) to the internal upsert payload.
+   */
+  private async persistSocialAccount(
     workspaceId: string,
-    payload: SocialAccountUpsertPayload,
+    data: MetaPageConnectData,
   ): Promise<SocialAccountConnectResult> {
+    const payload = this.toUpsertPayload(data);
+
     const existing = await this.socialAccountRepo.findByWorkspacePlatformAccountId(
       workspaceId,
       payload.platform,
       payload.platformAccountId,
     );
 
-    const encryptedAccessToken = this.encryptionService.encrypt(payload.accessToken);
+    const encryptedToken = this.encryptionService.encrypt(payload.accessToken);
 
     if (existing) {
-      await this.socialCredentialsRepo.updateBySocialAccountId(existing.id, {
-        accessToken: encryptedAccessToken,
-        expiresAt: payload.expiresAt ?? null,
-      });
-
-      await this.socialAccountRepo.update(existing.id, {
-        metadata: payload.metadata as unknown as Prisma.InputJsonValue,
-      });
+      await Promise.all([
+        this.socialCredentialsRepo.updateBySocialAccountId(existing.id, {
+          accessToken: encryptedToken,
+          expiresAt: payload.expiresAt ?? null,
+        }),
+        this.socialAccountRepo.update(existing.id, this.buildAccountUpdateData(payload)),
+      ]);
 
       return {
         id: existing.id,
@@ -111,6 +141,7 @@ export class SocialAccountsService {
         accountName: existing.accountName,
         username: existing.username ?? undefined,
         profilePicture: existing.profilePicture ?? undefined,
+        webhookSubscribed: payload.webhookSubscribed,
         created: false,
       };
     }
@@ -125,11 +156,14 @@ export class SocialAccountsService {
       profilePicture: payload.profilePicture,
       metadata: payload.metadata as unknown as Prisma.InputJsonValue,
       status: SocialAccountStatus.ACTIVE,
+      webhookSubscribed: payload.webhookSubscribed,
+      webhookSubscribedAt: payload.webhookSubscribedAt ?? null,
+      webhookFields: payload.webhookFields,
     });
 
     await this.socialCredentialsRepo.create({
       socialAccount: { connect: { id: account.id } },
-      accessToken: encryptedAccessToken,
+      accessToken: encryptedToken,
       expiresAt: payload.expiresAt ?? null,
     });
 
@@ -140,7 +174,40 @@ export class SocialAccountsService {
       accountName: account.accountName,
       username: account.username ?? undefined,
       profilePicture: account.profilePicture ?? undefined,
+      webhookSubscribed: payload.webhookSubscribed,
       created: true,
+    };
+  }
+
+  private toUpsertPayload(data: MetaPageConnectData): SocialAccountUpsertPayload {
+    return {
+      platform: data.platform,
+      platformAccountId: data.platformAccountId,
+      metaPageId: data.metaPageId,
+      accountName: data.accountName,
+      username: data.username,
+      profilePicture: data.profilePicture,
+      accessToken: data.accessToken,
+      expiresAt: null,
+      webhookSubscribed: data.webhookSubscribed,
+      webhookSubscribedAt: data.webhookSubscribedAt,
+      webhookFields: data.webhookFields,
+      metadata: { page: data.pageInfo },
+    };
+  }
+
+  private buildAccountUpdateData(
+    payload: SocialAccountUpsertPayload,
+  ): Prisma.SocialAccountUpdateInput {
+    return {
+      accountName: payload.accountName,
+      username: payload.username,
+      profilePicture: payload.profilePicture,
+      metadata: payload.metadata as unknown as Prisma.InputJsonValue,
+      status: SocialAccountStatus.ACTIVE,
+      webhookSubscribed: payload.webhookSubscribed,
+      webhookSubscribedAt: payload.webhookSubscribedAt ?? null,
+      webhookFields: payload.webhookFields,
     };
   }
 }

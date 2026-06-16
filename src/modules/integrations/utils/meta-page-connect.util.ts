@@ -1,22 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { SocialPlatform } from '@prisma/client';
 
-import type { MetaAsset } from '../interfaces';
-import type {
-  SocialAccountMetadata,
-  SocialAccountUpsertPayload,
-} from '../interfaces/social-account-upsert.interface';
-import type { CreateSocialAccountType } from '../validators';
-
-function buildPageMetadata(page: MetaAsset): SocialAccountMetadata {
-  return {
-    page: {
-      id: page.id,
-      name: page.name,
-      pictureUrl: page.picture?.data.url,
-    },
-  };
-}
+import type { MetaAsset, MetaPageConnectData, MetaPageSelection } from '../interfaces';
 
 export function findMetaPageById(pages: MetaAsset[], pageId: string): MetaAsset {
   const page = pages.find((item) => item.id === pageId);
@@ -32,36 +17,53 @@ export function findMetaPageById(pages: MetaAsset[], pageId: string): MetaAsset 
   return page;
 }
 
-export function buildMetaSocialAccountPayloads(
+export function buildMetaPageConnectData(
   page: MetaAsset,
-  selection: CreateSocialAccountType,
-): SocialAccountUpsertPayload[] {
-  const payloads: SocialAccountUpsertPayload[] = [];
+  selection: MetaPageSelection,
+  webhookFields: string[],
+  webhookSubscribedAt: Date,
+): MetaPageConnectData[] {
+  const results: MetaPageConnectData[] = [];
 
   if (selection.connectFacebook) {
-    payloads.push(buildFacebookPayload(page));
+    results.push(buildFacebookConnectData(page, webhookFields, webhookSubscribedAt));
   }
 
   if (selection.connectInstagram) {
-    payloads.push(buildInstagramPayload(page));
+    results.push(buildInstagramConnectData(page, webhookFields, webhookSubscribedAt));
   }
 
-  return payloads;
+  return results;
 }
 
-function buildFacebookPayload(page: MetaAsset): SocialAccountUpsertPayload {
+function buildFacebookConnectData(
+  page: MetaAsset,
+  webhookFields: string[],
+  webhookSubscribedAt: Date,
+): MetaPageConnectData {
   return {
+    metaPageId: page.id,
     platform: SocialPlatform.FACEBOOK,
     platformAccountId: page.id,
-    metaPageId: page.id,
     accountName: page.name,
     profilePicture: page.picture?.data.url,
     accessToken: page.access_token!,
-    metadata: buildPageMetadata(page),
+    webhookSubscribed: true,
+    webhookSubscribedAt,
+    webhookFields,
+    pageInfo: {
+      id: page.id,
+      name: page.name,
+      pictureUrl: page.picture?.data.url,
+    },
   };
 }
 
-function buildInstagramPayload(page: MetaAsset): SocialAccountUpsertPayload {
+function buildInstagramConnectData(
+  page: MetaAsset,
+  webhookFields: string[],
+  webhookSubscribedAt: Date,
+): MetaPageConnectData {
   const instagram = page.instagram_business_account;
 
   if (!instagram?.id) {
@@ -69,13 +71,20 @@ function buildInstagramPayload(page: MetaAsset): SocialAccountUpsertPayload {
   }
 
   return {
+    metaPageId: page.id,
     platform: SocialPlatform.INSTAGRAM,
     platformAccountId: instagram.id,
-    metaPageId: page.id,
     accountName: instagram.username ?? page.name,
     username: instagram.username,
     profilePicture: instagram.profile_picture_url,
     accessToken: page.access_token!,
-    metadata: buildPageMetadata(page),
+    webhookSubscribed: true,
+    webhookSubscribedAt,
+    webhookFields,
+    pageInfo: {
+      id: page.id,
+      name: page.name,
+      pictureUrl: page.picture?.data.url,
+    },
   };
 }

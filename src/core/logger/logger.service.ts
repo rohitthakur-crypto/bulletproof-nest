@@ -4,7 +4,7 @@ import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { LogLevel } from './enums';
 import type { IAppLogger } from './logger.interface';
 import type { LogBindings, LogErrorPayload, LogMetadata } from './logger.types';
-import { toErrorPayload } from './utils/error-payload.util';
+import { toErrorPayload } from './utils';
 
 const LOG_CONTEXT_FIELD = 'context';
 
@@ -28,29 +28,29 @@ export class AppLoggerService implements IAppLogger {
   }
 
   trace(message: string, meta?: LogMetadata): void {
-    this.log(LogLevel.Trace, message, meta);
+    this.log(LogLevel.TRACE, message, meta);
   }
 
   debug(message: string, meta?: LogMetadata): void {
-    this.log(LogLevel.Debug, message, meta);
+    this.log(LogLevel.DEBUG, message, meta);
   }
 
   info(message: string, meta?: LogMetadata): void {
-    this.log(LogLevel.Info, message, meta);
+    this.log(LogLevel.INFO, message, meta);
   }
 
   warn(message: string, meta?: LogMetadata): void {
-    this.log(LogLevel.Warn, message, meta);
+    this.log(LogLevel.WARN, message, meta);
   }
 
   error(message: string, meta?: LogMetadata, error?: Error | LogErrorPayload): void {
     const payload = error ? { ...meta, err: toErrorPayload(error) } : meta;
-    this.log(LogLevel.Error, message, payload);
+    this.log(LogLevel.ERROR, message, payload);
   }
 
   fatal(message: string, meta?: LogMetadata, error?: Error | LogErrorPayload): void {
     const payload = error ? { ...meta, err: toErrorPayload(error) } : meta;
-    this.log(LogLevel.Fatal, message, payload);
+    this.log(LogLevel.FATAL, message, payload);
   }
 
   child(bindings: LogBindings): IAppLogger {
