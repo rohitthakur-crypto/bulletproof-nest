@@ -70,7 +70,7 @@ export class MetaDmService {
 
     const accessToken = this.encryption.decrypt(credentials.accessToken);
 
-    const endpoint = this.resolveMessagesEndpoint(account.platform, account.platformAccountId);
+    const endpoint = this.resolveMessagesEndpoint(account.platform, account.metaPageId ?? '');
 
     const body: MetaDmRequest = {
       recipient: { id: recipientId },
@@ -87,7 +87,9 @@ export class MetaDmService {
       url: endpoint,
       baseURL: this.getGraphBaseUrl(),
       data: body,
-      params: { access_token: accessToken },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
 
     this.logger.debug(`DM sent. message_id=${response.message_id}`);

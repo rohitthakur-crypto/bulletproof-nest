@@ -46,8 +46,6 @@ export class AutomationTriggerService {
       payload.triggerType,
     );
 
-    console.log('matchingAutomations', matchingAutomations);
-    console.log('payload', payload);
     if (matchingAutomations.length === 0) {
       return;
     }
