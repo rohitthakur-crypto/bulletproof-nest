@@ -6,7 +6,7 @@ import type { HttpRequestOptions } from './interfaces';
 
 import { HTTP_STATUS_OK_MAX_EXCLUSIVE, HTTP_STATUS_OK_MIN } from '@/common/constants';
 import { HttpMethod } from '@/common/enums';
-import { AppConfigService } from '@/core/config';
+import { AppConfigService } from '@/core/config/services/app-config.service';
 
 @Injectable()
 export class HttpClientService {

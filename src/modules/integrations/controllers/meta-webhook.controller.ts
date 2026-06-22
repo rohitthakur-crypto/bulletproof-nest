@@ -3,7 +3,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 
 import { META_WEBHOOK_ACK_RESPONSE } from '../constants';
-import { MetaWebhookService } from '../services';
+import { MetaWebhookService } from '../services/meta-webhook.service';
 import { MetaWebhookEventBodyDto, MetaWebhookVerifyQueryDto } from '../validators';
 
 import { SWAGGER_TAGS } from '@/common/constants';
@@ -40,8 +40,8 @@ export class MetaWebhookController {
   @SkipEnvelope()
   @ApiOperation({ summary: 'Receive Meta webhook events' })
   @ApiOkResponse({ description: 'Event acknowledged', type: String })
-  handleEvent(@Body() body: MetaWebhookEventBodyDto): string {
-    this.metaWebhookService.handleWebhook(body);
+  async handleEvent(@Body() body: MetaWebhookEventBodyDto): Promise<string> {
+    await this.metaWebhookService.handleWebhook(body);
     return META_WEBHOOK_ACK_RESPONSE;
   }
 }

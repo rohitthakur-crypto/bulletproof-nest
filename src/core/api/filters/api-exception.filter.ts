@@ -12,7 +12,7 @@ import { ZodSerializationMapper } from '../mappers/zod-serialization.mapper';
 import { ZodValidationMapper } from '../mappers/zod-validation.mapper';
 
 import { Environment } from '@/common/enums';
-import { AppConfigService } from '@/core/config';
+import { AppConfigService } from '@/core/config/services/app-config.service';
 
 const mappers: ExceptionMapper[] = [
   new ZodValidationMapper(),

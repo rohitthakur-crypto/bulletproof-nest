@@ -6,14 +6,14 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import { resolveIncomingMessage, resolveRequestId, resolveServerResponse } from '@/common/utils';
-import { AppConfigService } from '@/core/config';
+import { AppConfigService } from '@/core/config/services/app-config.service';
+import { LogLevel } from '@/core/logger/enums/log-level.enum';
 import {
-  LogLevel,
   buildHttpAccessLog,
   formatHttpAccessMessage,
   resolveHttpLogLevel,
   shouldExcludeHttpLog,
-} from '@/core/logger';
+} from '@/core/logger/utils/http-access-log.util';
 
 /**
  * Emits one structured access log per HTTP request when the response finishes.

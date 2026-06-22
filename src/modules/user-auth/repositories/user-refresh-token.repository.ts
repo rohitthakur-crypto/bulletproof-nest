@@ -3,7 +3,8 @@ import { RefreshTokenStatus, type UserRefreshToken } from '@prisma/client';
 
 import { SaveRefreshTokenInput } from '../interfaces';
 
-import { BasePrismaRepository, PrismaService } from '@/infra/prisma';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { BasePrismaRepository } from '@/infra/prisma/repositories/base.repository';
 
 @Injectable()
 export class UserRefreshTokenRepository extends BasePrismaRepository {

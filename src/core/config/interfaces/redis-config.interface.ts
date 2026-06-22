@@ -3,4 +3,5 @@ export interface RedisConfig {
   readonly port: number;
   readonly password: string;
   readonly tls: boolean;
+  readonly db: number;
 }

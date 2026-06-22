@@ -25,12 +25,12 @@ import { CreateSocialAccountsDto, GetSocialAccountsQueryDto } from '../validator
 import { SWAGGER_TAGS } from '@/common/constants';
 import { ApiVersion } from '@/common/enums';
 import { CurrentUser } from '@/modules/user-auth/decorators';
-import { UserAuthGuard } from '@/modules/user-auth/guards';
+import { UserAuthGuard } from '@/modules/user-auth/guards/user-auth.guard';
 import { type AuthenticatedUser } from '@/modules/user-auth/interfaces';
 import { WorkspaceRoles } from '@/modules/workspaces/decorators';
 import { CurrentWorkspace } from '@/modules/workspaces/decorators';
-import { WorkspaceMemberGuard } from '@/modules/workspaces/guards';
-import { WorkspaceRolesGuard } from '@/modules/workspaces/guards';
+import { WorkspaceMemberGuard } from '@/modules/workspaces/guards/workspace-member.guard';
+import { WorkspaceRolesGuard } from '@/modules/workspaces/guards/workspace-roles.guard';
 
 @ApiTags(SWAGGER_TAGS.SOCIAL_ACCOUNTS)
 @Controller({ path: 'social-accounts', version: ApiVersion.V1 })

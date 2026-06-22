@@ -4,8 +4,8 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { AppModule } from './app.module';
 
 import { configureApplication } from '@/bootstrap';
-import { AppConfigService } from '@/core/config';
-import { PrismaService } from '@/infra/prisma';
+import { AppConfigService } from '@/core/config/services/app-config.service';
+import { PrismaService } from '@/infra/prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -18,9 +18,9 @@ async function bootstrap() {
 
   await configureApplication(app);
 
-  const configService = app.get(AppConfigService);
+  const config = app.get(AppConfigService);
 
-  await app.listen(configService.app.port, configService.app.host);
+  await app.listen(config.app.port, config.app.host);
 }
 
 bootstrap().catch((err) => {

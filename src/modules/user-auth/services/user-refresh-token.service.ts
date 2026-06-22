@@ -2,13 +2,13 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { RefreshTokenStatus, type UserRefreshToken } from '@prisma/client';
 
 import type { SaveRefreshTokenInput } from '../interfaces';
-import { UserRefreshTokenRepository } from '../repositories';
+import { UserRefreshTokenRepository } from '../repositories/user-refresh-token.repository';
 
 import { UserSessionService } from './user-session.service';
 import { UserTokenService } from './user-token.service';
 
 import { hashToken, isExpired } from '@/common/utils';
-import type { RefreshTokenPayload } from '@/core/jwt';
+import type { RefreshTokenPayload } from '@/core/jwt/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class UserRefreshTokenService {

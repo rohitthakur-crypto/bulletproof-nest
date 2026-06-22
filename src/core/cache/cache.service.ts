@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { CACHE_TTL, type CacheTtl } from './cache.constants';
 import type { CacheSetManyEntry } from './cache.types';
 
-import { AppConfigService } from '@/core/config';
-import { RedisService } from '@/infra/redis';
+import { AppConfigService } from '@/core/config/services/app-config.service';
+import { RedisService } from '@/infra/redis/redis.service';
 
 const LOCK_TTL_SECONDS = 10;
 const LOCK_RETRY_DELAY_MS = 100;
@@ -16,9 +16,9 @@ export class CacheService {
 
   constructor(
     private readonly redisService: RedisService,
-    private readonly appConfig: AppConfigService,
+    private readonly config: AppConfigService,
   ) {
-    this.keyPrefix = `${appConfig.app.name}:${appConfig.app.env}`;
+    this.keyPrefix = `${config.app.name}:${config.app.env}`;
   }
 
   buildKey(...parts: Array<string | number>): string {

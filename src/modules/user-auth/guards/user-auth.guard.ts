@@ -5,7 +5,9 @@ import { AuthenticatedRequest } from '../interfaces';
 import { UserSessionService } from '../services/user-session.service';
 
 import { AuthActorType } from '@/common/enums';
-import { AccessTokenPayload, JwtVerifierService, TokenType } from '@/core/jwt';
+import { TokenType } from '@/core/jwt/enums/token.enum';
+import { AccessTokenPayload } from '@/core/jwt/interfaces/jwt-payload.interface';
+import { JwtVerifierService } from '@/core/jwt/services/jwt-verifier.service';
 
 @Injectable()
 export class UserAuthGuard implements CanActivate {

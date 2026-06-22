@@ -5,7 +5,7 @@ import { withTransaction } from './helpers/transaction.helper';
 import { createExtendedPrismaClient, type ExtendedPrismaClient } from './prisma.extension';
 import type { TransactionCallback, TransactionOptions } from './prisma.types';
 
-import { AppConfigService } from '@/core/config';
+import { AppConfigService } from '@/core/config/services/app-config.service';
 
 @Injectable()
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
@@ -13,8 +13,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   readonly client: ExtendedPrismaClient;
 
-  constructor(private readonly appConfig: AppConfigService) {
-    this.client = createExtendedPrismaClient(appConfig);
+  constructor(private readonly config: AppConfigService) {
+    this.client = createExtendedPrismaClient(config);
   }
 
   async onModuleInit(): Promise<void> {

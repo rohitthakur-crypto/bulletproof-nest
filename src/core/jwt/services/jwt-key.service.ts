@@ -5,46 +5,43 @@ import { TokenType } from '../enums/token.enum';
 import { JwtKeyPair } from '../interfaces/jwt-key-pair.interface';
 
 import { AuthActorType } from '@/common/enums';
-import { AppConfigService } from '@/core/config';
 import type { JwtKeyPairConfig } from '@/core/config/interfaces';
+import { AppConfigService } from '@/core/config/services/app-config.service';
 
 @Injectable()
 export class JwtKeyService {
-  constructor(private readonly appConfig: AppConfigService) {}
+  constructor(private readonly config: AppConfigService) {}
 
   getUserAccessKeys(): JwtKeyPair {
-    return this.toKeyPair(this.appConfig.jwt.user.access, JWT_KIDS.USER_ACCESS);
+    return this.toKeyPair(this.config.jwt.user.access, JWT_KIDS.USER_ACCESS);
   }
 
   getUserRefreshKeys(): JwtKeyPair {
-    return this.toKeyPair(this.appConfig.jwt.user.refresh, JWT_KIDS.USER_REFRESH);
+    return this.toKeyPair(this.config.jwt.user.refresh, JWT_KIDS.USER_REFRESH);
   }
 
   getUserPasswordResetKeys(): JwtKeyPair {
-    return this.toKeyPair(this.appConfig.jwt.user.passwordReset, JWT_KIDS.USER_PASSWORD_RESET);
+    return this.toKeyPair(this.config.jwt.user.passwordReset, JWT_KIDS.USER_PASSWORD_RESET);
   }
 
   getUserEmailVerificationKeys(): JwtKeyPair {
-    return this.toKeyPair(
-      this.appConfig.jwt.user.emailVerification,
-      JWT_KIDS.USER_EMAIL_VERIFICATION,
-    );
+    return this.toKeyPair(this.config.jwt.user.emailVerification, JWT_KIDS.USER_EMAIL_VERIFICATION);
   }
 
   getAdminAccessKeys(): JwtKeyPair {
-    return this.toKeyPair(this.appConfig.jwt.admin.access, JWT_KIDS.ADMIN_ACCESS);
+    return this.toKeyPair(this.config.jwt.admin.access, JWT_KIDS.ADMIN_ACCESS);
   }
 
   getAdminRefreshKeys(): JwtKeyPair {
-    return this.toKeyPair(this.appConfig.jwt.admin.refresh, JWT_KIDS.ADMIN_REFRESH);
+    return this.toKeyPair(this.config.jwt.admin.refresh, JWT_KIDS.ADMIN_REFRESH);
   }
 
   getAdminPasswordResetKeys(): JwtKeyPair {
-    return this.toKeyPair(this.appConfig.jwt.admin.passwordReset, JWT_KIDS.ADMIN_PASSWORD_RESET);
+    return this.toKeyPair(this.config.jwt.admin.passwordReset, JWT_KIDS.ADMIN_PASSWORD_RESET);
   }
 
   getMetaOauthStateKeys(): JwtKeyPair {
-    return this.toKeyPair(this.appConfig.jwt.meta.state, JWT_KIDS.META_OAUTH_STATE);
+    return this.toKeyPair(this.config.jwt.meta.state, JWT_KIDS.META_OAUTH_STATE);
   }
 
   getKeys(actor: AuthActorType, tokenType: TokenType): JwtKeyPair {

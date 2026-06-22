@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
 import { AuthActorType } from '@/common/enums';
-import {
-  JwtSignerService,
-  JwtVerifierService,
-  TokenType,
-  type AccessTokenPayload,
-  type EmailVerificationPayload,
-  type PasswordResetPayload,
-  type RefreshTokenPayload,
-} from '@/core/jwt';
+import { TokenType } from '@/core/jwt/enums/token.enum';
+import type {
+  AccessTokenPayload,
+  EmailVerificationPayload,
+  PasswordResetPayload,
+  RefreshTokenPayload,
+} from '@/core/jwt/interfaces/jwt-payload.interface';
+import { JwtSignerService } from '@/core/jwt/services/jwt-signer.service';
+import { JwtVerifierService } from '@/core/jwt/services/jwt-verifier.service';
 
 @Injectable()
 export class UserTokenService {

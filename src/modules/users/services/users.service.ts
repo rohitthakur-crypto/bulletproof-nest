@@ -3,7 +3,7 @@ import type { User } from '@prisma/client';
 
 import { UsersCacheService } from '../cache/users-cache.service';
 import type { CreateUserInput, UpdateUserInput } from '../dto';
-import { UsersRepository } from '../repositories';
+import { UsersRepository } from '../repositories/users.repository';
 
 @Injectable()
 export class UsersService {

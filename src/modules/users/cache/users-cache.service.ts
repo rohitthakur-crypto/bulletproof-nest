@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { User } from '@prisma/client';
 
-import { CacheService, CACHE_TTL } from '@/core/cache';
+import { CACHE_TTL } from '@/core/cache/cache.constants';
+import { CacheService } from '@/core/cache/cache.service';
 
 @Injectable()
 export class UsersCacheService {

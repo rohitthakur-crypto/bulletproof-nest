@@ -10,4 +10,6 @@ export const redisEnvSchema = z.object({
   REDIS_PASSWORD: z.string().min(1, 'REDIS_PASSWORD is required'),
 
   REDIS_TLS: envBool(false),
+
+  REDIS_DB: z.coerce.number().int().min(0).max(15).default(0),
 });

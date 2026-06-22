@@ -5,18 +5,19 @@ import type { FastifyReply } from 'fastify';
 
 import type { ConnectableAssetResponse } from '../dto';
 import { ConnectableAssetResponseDto } from '../dto';
-import { MetaService } from '../services';
+import { MetaService } from '../services/meta.service';
 import { MetaOAuthCallbackQueryDto } from '../validators';
 
 import { SWAGGER_TAGS } from '@/common/constants';
 import { ApiVersion } from '@/common/enums';
 import { SkipEnvelope } from '@/core/api/decorators';
-import { AppLoggerService } from '@/core/logger';
+import { AppLoggerService } from '@/core/logger/logger.service';
 import { CurrentUser } from '@/modules/user-auth/decorators';
-import { UserAuthGuard } from '@/modules/user-auth/guards';
+import { UserAuthGuard } from '@/modules/user-auth/guards/user-auth.guard';
 import type { AuthenticatedUser } from '@/modules/user-auth/interfaces';
 import { CurrentWorkspace, WorkspaceRoles } from '@/modules/workspaces/decorators';
-import { WorkspaceMemberGuard, WorkspaceRolesGuard } from '@/modules/workspaces/guards';
+import { WorkspaceMemberGuard } from '@/modules/workspaces/guards/workspace-member.guard';
+import { WorkspaceRolesGuard } from '@/modules/workspaces/guards/workspace-roles.guard';
 
 @ApiTags(SWAGGER_TAGS.META)
 @Controller({ path: 'meta', version: ApiVersion.V1 })

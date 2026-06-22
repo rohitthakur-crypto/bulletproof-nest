@@ -1,8 +1,10 @@
 import z from 'zod';
 
+import { MetaChangeField } from '../enums';
+
 export const metaWebhookChangeSchema = z
   .object({
-    field: z.string(),
+    field: z.string() as z.ZodType<MetaChangeField>,
     value: z.unknown(),
   })
   .passthrough();

@@ -6,8 +6,8 @@ import { SWAGGER_TAG_DESCRIPTIONS, SWAGGER_TAG_ORDER } from '@/common/constants'
 
 function buildSwaggerConfig(): ReturnType<DocumentBuilder['build']> {
   const builder = new DocumentBuilder()
-    .setTitle('ManyChat Clone API')
-    .setDescription('ManyChat Clone API Docs')
+    .setTitle('NSL Many Chat Aap API')
+    .setDescription('NSL Many Chat API Docs')
     .setVersion('1.0')
     .addBearerAuth();
 

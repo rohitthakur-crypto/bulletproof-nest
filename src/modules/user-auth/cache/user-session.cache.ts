@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { SessionStatus, type UserSession } from '@prisma/client';
 
-import { CacheService, CACHE_TTL } from '@/core/cache';
+import { CACHE_TTL } from '@/core/cache/cache.constants';
+import { CacheService } from '@/core/cache/cache.service';
 
 const SESSION_CACHE_SCOPE = 'user' as const;
 const SESSION_TTL = CACHE_TTL.MINUTE;

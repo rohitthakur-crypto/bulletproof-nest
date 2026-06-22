@@ -1,17 +1,27 @@
 import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 
-import type { MetaWebhookEventBody } from '../validators';
-import type { MetaWebhookVerifyQuery } from '../validators';
+import { FacebookHandler } from '../handlers/facebook.handler';
+import { InstagramHandler } from '../handlers/instagram.handler';
+import { WhatsappHandler } from '../handlers/whatsapp.handler';
+import type { PlatformWebhookHandler } from '../interfaces';
+import type { MetaWebhookEventBody, MetaWebhookVerifyQuery } from '../validators';
 
-import { AppConfigService } from '@/core/config';
-import { AppLoggerService } from '@/core/logger';
+import { AppConfigService } from '@/core/config/services/app-config.service';
+import { AppLoggerService } from '@/core/logger/logger.service';
 
 @Injectable()
 export class MetaWebhookService {
+  private readonly handlers: PlatformWebhookHandler[];
+
   constructor(
     private readonly logger: AppLoggerService,
     private readonly config: AppConfigService,
-  ) {}
+    facebookHandler: FacebookHandler,
+    instagramHandler: InstagramHandler,
+    whatsappHandler: WhatsappHandler,
+  ) {
+    this.handlers = [facebookHandler, instagramHandler, whatsappHandler];
+  }
 
   /**
    * Handles Meta's GET challenge-response subscription verification.
@@ -32,17 +42,22 @@ export class MetaWebhookService {
   }
 
   /**
-   * Entry-point for all inbound Meta webhook events.
-   * Currently validates the payload shape (via Zod DTO) and logs it.
-   *
-   * TODO: persist raw event to WebhookEvent table
-   * TODO: dispatch to BullMQ queue for async processing
-   * TODO: route to platform-specific handler (Facebook / Instagram / WhatsApp)
+   * Entry point for all inbound Meta webhook events.
+   * Dispatches each entry to the correct platform handler.
+   * Returns immediately — all heavy processing is deferred to BullMQ workers.
    */
-  handleWebhook(body: MetaWebhookEventBody): void {
-    this.logger.info('Meta webhook received', {
-      object: body.object,
-      entryCount: body.entry.length,
-    });
+  async handleWebhook(body: MetaWebhookEventBody): Promise<void> {
+    const handler = this.handlers.find((h) => h.canHandle(body.object));
+
+    if (!handler) {
+      this.logger.warn(`No handler registered for Meta webhook object: ${body.object}`);
+      return;
+    }
+
+    this.logger.debug(`Routing ${body.entry.length} entries for object "${body.object}"`);
+
+    for (const entry of body.entry) {
+      await handler.handle(entry);
+    }
   }
 }

@@ -6,7 +6,7 @@ import { LoggerFactory } from './logger.factory';
 import { AppLoggerService } from './logger.service';
 import { createPinoModuleParams } from './pino/pino-options.factory';
 
-import { AppConfigService } from '@/core/config';
+import { AppConfigService } from '@/core/config/services/app-config.service';
 
 @Global()
 @Module({

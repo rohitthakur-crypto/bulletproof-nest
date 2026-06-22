@@ -16,7 +16,8 @@ import { WorkspaceMemberRole } from '@prisma/client';
 
 import { WorkspaceRoles } from '../decorators';
 import { type WorkspaceResponse, WorkspaceResponseDto } from '../dto';
-import { WorkspaceRouteMemberGuard, WorkspaceRolesGuard } from '../guards';
+import { WorkspaceRolesGuard } from '../guards/workspace-roles.guard';
+import { WorkspaceRouteMemberGuard } from '../guards/workspace-route-member.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto } from '../validators';
 

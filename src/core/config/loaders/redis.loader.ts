@@ -11,5 +11,6 @@ export const redisConfig = registerAs('redis', (): RedisConfig => {
     port: e.REDIS_PORT,
     password: e.REDIS_PASSWORD,
     tls: e.REDIS_TLS ?? false,
+    db: e.REDIS_DB || 0,
   };
 });

@@ -1,0 +1,17 @@
+export const AUTOMATION_ERRORS = {
+  NOT_FOUND: 'Automation not found',
+  EXECUTION_NOT_FOUND: 'Automation execution not found',
+  NOT_DRAFT: 'Automation must be in DRAFT status to publish',
+  NOT_ACTIVE: 'Automation must be ACTIVE to pause',
+  NOT_PAUSED: 'Automation must be PAUSED to resume',
+  ALREADY_ARCHIVED: 'Automation is already archived',
+  CANNOT_ARCHIVE_ACTIVE: 'Pause the automation before archiving',
+  SOCIAL_ACCOUNT_NOT_FOUND: 'Social account not found or not active',
+  SOCIAL_ACCOUNT_MISMATCH: 'Automation does not belong to this social account',
+  INVALID_TRIGGER_CONFIG: 'Trigger configuration is invalid',
+  INVALID_FLOW_DATA: 'Flow data is invalid',
+  FLOW_REQUIRED_FOR_PUBLISH: 'Flow data with at least one node is required to publish',
+  UNSUPPORTED_TRIGGER: 'Unsupported trigger type for this platform',
+  UNSUPPORTED_ACTION: 'Unsupported action type',
+  NO_CURSOR: 'No pagination cursor available',
+} as const;

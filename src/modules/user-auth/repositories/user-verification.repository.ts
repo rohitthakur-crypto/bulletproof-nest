@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { type Prisma, type UserVerificationToken, VerificationTokenType } from '@prisma/client';
 
-import { BasePrismaRepository, PrismaService } from '@/infra/prisma';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { BasePrismaRepository } from '@/infra/prisma/repositories/base.repository';
 
 type FindFirstArgs = Pick<Prisma.UserVerificationTokenFindFirstArgs, 'select' | 'include'>;
 

@@ -16,14 +16,6 @@ import type { AuthenticatedUser } from '@/modules/user-auth/interfaces';
 export class MetaConnectService {
   constructor(private readonly metaService: MetaService) {}
 
-  /**
-   * Resolves the user's Meta pages from the OAuth session, subscribes each
-   * selected page to webhooks (and verifies the subscription), then maps the
-   * results to normalised MetaPageConnectData objects ready for persistence.
-   *
-   * Per-page failures are collected rather than thrown so the caller can
-   * perform a partial-success connect and report back accurately.
-   */
   public async buildConnectPayloads(
     user: AuthenticatedUser,
     workspaceId: string,
@@ -54,10 +46,6 @@ export class MetaConnectService {
     return { payloads, failures };
   }
 
-  /**
-   * Clears the short-lived OAuth session from cache after a successful connect.
-   * Should be called once at least one account has been persisted.
-   */
   public async clearConnectSession(sessionId: string, workspaceId: string): Promise<void> {
     await this.metaService.clearOAuthSession(sessionId, workspaceId);
   }

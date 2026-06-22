@@ -4,7 +4,7 @@ import { Prisma, Workspace, WorkspaceMemberRole } from '@prisma/client';
 import { WorkspaceCacheService } from '../cache/workspace.cache';
 import type { WorkspaceResponse } from '../dto';
 import { toWorkspaceResponse } from '../mappers/workspace-response.mapper';
-import { WorkspaceRepository } from '../repositories';
+import { WorkspaceRepository } from '../repositories/workspace.repository';
 import { createWorkspaceSlug } from '../utils/create-workspace-slug.util';
 import { CreateWorkspaceInput, UpdateWorkspaceInput } from '../validators';
 
@@ -43,7 +43,7 @@ export class WorkspaceService {
   }
 
   findById(id: string): Promise<Workspace> {
-    return this.workspaceCache.rememberById(id, async () => {
+    return this.workspaceCache.getOrSetById(id, async () => {
       const workspace = await this.workspaceRepository.findById(id);
       if (!workspace) throw new NotFoundException('Workspace not found');
       return workspace;

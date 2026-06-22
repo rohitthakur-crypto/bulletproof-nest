@@ -3,7 +3,7 @@ import { HealthIndicatorService, type HealthIndicatorResult } from '@nestjs/term
 
 import { HEALTH_CHECK_TIMEOUT_MS, HEALTH_SERVICE_KEYS } from '../constants/health.constants';
 
-import { RedisService } from '@/infra/redis';
+import { RedisService } from '@/infra/redis/redis.service';
 
 @Injectable()
 export class RedisHealthIndicator {

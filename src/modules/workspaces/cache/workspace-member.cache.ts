@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { WorkspaceMember } from '@prisma/client';
 
-import { CacheService, CACHE_TTL } from '@/core/cache';
+import { CACHE_TTL } from '@/core/cache/cache.constants';
+import { CacheService } from '@/core/cache/cache.service';
 
 @Injectable()
 export class WorkspaceMemberCacheService {
@@ -13,7 +14,7 @@ export class WorkspaceMemberCacheService {
       this.cache.buildKey('workspace-members', 'workspace', workspaceId, 'user', userId),
   };
 
-  rememberById(id: string, loader: () => Promise<WorkspaceMember>): Promise<WorkspaceMember> {
+  getOrSetById(id: string, loader: () => Promise<WorkspaceMember>): Promise<WorkspaceMember> {
     return this.cache.remember(this.keys.byId(id), CACHE_TTL.FIVE_MIN, loader);
   }
 

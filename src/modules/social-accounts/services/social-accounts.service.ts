@@ -8,18 +8,22 @@ import type {
   SocialAccountConnectResult,
   SocialAccountUpsertPayload,
 } from '../interfaces';
-import { toSocialAccountResponse } from '../mappers/social-account.mapper';
-import { SocialAccountsRepository, SocialCredentialsRepository } from '../repositories';
+import { toSocialAccountResponse } from '../mappers';
+import { SocialAccountsRepository } from '../repositories/social-accounts.repository';
+import { SocialCredentialsRepository } from '../repositories/social-credentials.repository';
 import type {
   CreateSocialAccountsType,
   GetSocialAccountsQuery,
   ListSocialAccountsFilters,
 } from '../validators';
 
-import { EncryptionService } from '@/core/security/encryption';
-import { buildOffsetPaginationMeta, toPrismaOffset } from '@/infra/prisma';
+import { EncryptionService } from '@/core/security/encryption/encryption.service';
+import {
+  buildOffsetPaginationMeta,
+  toPrismaOffset,
+} from '@/infra/prisma/helpers/pagination.helper';
 import type { MetaPageConnectData } from '@/modules/integrations/interfaces';
-import { MetaConnectService } from '@/modules/integrations/services';
+import { MetaConnectService } from '@/modules/integrations/services/meta-connect.service';
 import type { AuthenticatedUser } from '@/modules/user-auth/interfaces';
 
 @Injectable()
@@ -209,5 +213,19 @@ export class SocialAccountsService {
       webhookSubscribedAt: payload.webhookSubscribedAt ?? null,
       webhookFields: payload.webhookFields,
     };
+  }
+
+  /**
+   * Finds an ACTIVE social account by its Meta platform account ID (page/IG ID).
+   * Used by webhook handlers where only the Meta platform ID is available.
+   * Returns null for non-existent or non-ACTIVE accounts so webhook events
+   * are silently dropped for disconnected/revoked accounts.
+   */
+  async findActiveByPlatformAccountId(platformAccountId: string) {
+    const account = await this.socialAccountRepo.findByPlatformAccountId(platformAccountId);
+
+    if (!account || account.status !== SocialAccountStatus.ACTIVE) return null;
+
+    return account;
   }
 }

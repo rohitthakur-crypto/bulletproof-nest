@@ -11,7 +11,7 @@ import { setupMiddlewares } from './middleware.bootstrap';
 import { setupSwagger } from './swagger.bootstrap';
 import { setupValidation } from './validation.bootstrap';
 
-import { AppConfigService } from '@/core/config';
+import { AppConfigService } from '@/core/config/services/app-config.service';
 
 /**
  * Application bootstrap pipeline.

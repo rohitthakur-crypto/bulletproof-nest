@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { SessionStatus, type Prisma, type UserSession } from '@prisma/client';
 
-import { BasePrismaRepository, PrismaService } from '@/infra/prisma';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { BasePrismaRepository } from '@/infra/prisma/repositories/base.repository';
 
 @Injectable()
 export class UserSessionRepository extends BasePrismaRepository {

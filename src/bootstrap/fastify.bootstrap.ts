@@ -8,7 +8,7 @@ import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { FastifyRequest } from 'fastify';
 
 import { CORS_ALLOWED_METHODS } from '@/common/enums';
-import type { AppConfigService } from '@/core/config';
+import type { AppConfigService } from '@/core/config/services/app-config.service';
 
 export async function setupFastify(
   app: NestFastifyApplication,

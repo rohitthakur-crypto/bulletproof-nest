@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { UserCredentialRepository } from '../repositories';
+import { UserCredentialRepository } from '../repositories/user-credential.repository';
 
-import { PasswordService } from '@/core/security/password';
+import { PasswordService } from '@/core/security/password/password.service';
 
 @Injectable()
 export class UserCredentialService {

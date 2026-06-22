@@ -3,8 +3,9 @@ import type { Prisma, SocialAccount, SocialPlatform } from '@prisma/client';
 
 import type { ListSocialAccountsFilters } from '../validators';
 
-import { BasePrismaRepository, PrismaService } from '@/infra/prisma';
-import type { PrismaOffsetArgs } from '@/infra/prisma';
+import type { PrismaOffsetArgs } from '@/infra/prisma/helpers/pagination.helper';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { BasePrismaRepository } from '@/infra/prisma/repositories/base.repository';
 
 @Injectable()
 export class SocialAccountsRepository extends BasePrismaRepository {
@@ -19,6 +20,18 @@ export class SocialAccountsRepository extends BasePrismaRepository {
   async findByIdAndWorkspace(id: string, workspaceId: string): Promise<SocialAccount | null> {
     return this.db.socialAccount.findFirst({
       where: { id, workspaceId },
+    });
+  }
+
+  /**
+   * Looks up a social account by its Meta platform account ID alone (no workspaceId).
+   * Used by webhook handlers where the entry.id is the only identifier available.
+   * Returns the first active match — Meta platform account IDs are globally unique.
+   */
+  async findByPlatformAccountId(platformAccountId: string): Promise<SocialAccount | null> {
+    return this.db.socialAccount.findFirst({
+      where: { platformAccountId },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

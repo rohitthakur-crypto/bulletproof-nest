@@ -15,9 +15,9 @@ import { UserTokenService } from './user-token.service';
 
 import { AuthActorType } from '@/common/enums';
 import { hashToken, toDate } from '@/common/utils';
-import { AppConfigService } from '@/core/config';
-import { TokenType } from '@/core/jwt';
-import { AppLoggerService } from '@/core/logger';
+import { AppConfigService } from '@/core/config/services/app-config.service';
+import { TokenType } from '@/core/jwt/enums/token.enum';
+import { AppLoggerService } from '@/core/logger/logger.service';
 import { toUserResponse } from '@/modules/users/mappers/user-response.mapper';
 import { UsersService } from '@/modules/users/services/users.service';
 import { WorkspaceService } from '@/modules/workspaces/services/workspace.service';

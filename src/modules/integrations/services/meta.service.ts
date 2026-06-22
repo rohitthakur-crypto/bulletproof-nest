@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { AxiosError } from 'axios';
 
-import { MetaOAuthCacheService } from '../cache';
+import { MetaCacheService } from '../cache/meta.cache.service';
 import {
   META_GRAPH_ME_ACCOUNTS_PATH,
   META_GRAPH_OAUTH_ACCESS_TOKEN_PATH,
@@ -28,12 +28,14 @@ import { toConnectableAssets } from '../mappers';
 import type { MetaOAuthCallbackQuery } from '../validators';
 
 import { AuthActorType, HttpMethod } from '@/common/enums';
-import { AppConfigService } from '@/core/config';
-import { JwtSignerService, JwtVerifierService, TokenType } from '@/core/jwt';
-import type { MetaOauthTokenPayload } from '@/core/jwt';
-import { AppLoggerService } from '@/core/logger';
-import { EncryptionService } from '@/core/security/encryption';
-import { HttpClientService } from '@/infra/http';
+import { AppConfigService } from '@/core/config/services/app-config.service';
+import { TokenType } from '@/core/jwt/enums/token.enum';
+import type { MetaOauthTokenPayload } from '@/core/jwt/interfaces/jwt-payload.interface';
+import { JwtSignerService } from '@/core/jwt/services/jwt-signer.service';
+import { JwtVerifierService } from '@/core/jwt/services/jwt-verifier.service';
+import { AppLoggerService } from '@/core/logger/logger.service';
+import { EncryptionService } from '@/core/security/encryption/encryption.service';
+import { HttpClientService } from '@/infra/http/http-client.service';
 import type { AuthenticatedUser } from '@/modules/user-auth/interfaces';
 
 @Injectable()
@@ -44,7 +46,7 @@ export class MetaService {
     private readonly http: HttpClientService,
     private readonly jwtSignerService: JwtSignerService,
     private readonly jwtVerifierService: JwtVerifierService,
-    private readonly oAuthCache: MetaOAuthCacheService,
+    private readonly metaCache: MetaCacheService,
     private readonly encryptionService: EncryptionService,
   ) {}
 
@@ -130,7 +132,7 @@ export class MetaService {
     workspaceId: string,
   ): Promise<MetaAsset[]> {
     const session = await this.requireOAuthSession(user.sessionId, workspaceId);
-    const response = await this.fetchUserPages(session.accessToken);
+    const response = await this.fetchSocialAccountAssets(session.accessToken);
 
     return response.data;
   }
@@ -167,7 +169,7 @@ export class MetaService {
   // ─── Session Management ──────────────────────────────────────────────────────
 
   public async clearOAuthSession(sessionId: string, workspaceId: string): Promise<void> {
-    await this.oAuthCache.deleteOAuthSession(sessionId, workspaceId);
+    await this.metaCache.deleteOAuthSession(sessionId, workspaceId);
   }
 
   // ─── Private: URL helpers ────────────────────────────────────────────────────
@@ -259,14 +261,14 @@ export class MetaService {
       accessToken: this.encryptionService.encrypt(accessToken),
     };
 
-    await this.oAuthCache.setOAuthSession(sessionId, workspaceId, payload);
+    await this.metaCache.setOAuthSession(sessionId, workspaceId, payload);
   }
 
   private async requireOAuthSession(
     sessionId: string,
     workspaceId: string,
   ): Promise<MetaOAuthSession> {
-    const session = await this.oAuthCache.getOAuthSession(sessionId, workspaceId);
+    const session = await this.metaCache.getOAuthSession(sessionId, workspaceId);
 
     if (!session) {
       throw new NotFoundException('Meta OAuth session not found or expired — please reconnect');
@@ -285,7 +287,7 @@ export class MetaService {
 
   // ─── Private: Graph API ──────────────────────────────────────────────────────
 
-  private async fetchUserPages(accessToken: string): Promise<MetaAssetsResponse> {
+  private async fetchSocialAccountAssets(accessToken: string): Promise<MetaAssetsResponse> {
     return this.http.request<MetaAssetsResponse>({
       method: HttpMethod.GET,
       baseURL: this.getGraphBaseUrl(),

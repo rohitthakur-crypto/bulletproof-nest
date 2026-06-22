@@ -4,7 +4,7 @@ import type { RequestContext } from '../http/request-context';
 
 import type { ExceptionMapper } from './exception-mapper.interface';
 
-import { mapPrismaError } from '@/infra/prisma';
+import { mapPrismaError } from '@/infra/prisma/helpers/prisma-error.mapper';
 
 export class PrismaExceptionMapper implements ExceptionMapper {
   supports(exception: unknown): boolean {

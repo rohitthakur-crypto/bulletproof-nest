@@ -7,7 +7,7 @@ import {
 import type { Workspace, WorkspaceMember } from '@prisma/client';
 
 import { WorkspaceMemberCacheService } from '../cache/workspace-member.cache';
-import { WorkspaceMemberRepository } from '../repositories';
+import { WorkspaceMemberRepository } from '../repositories/workspace-member.repository';
 import type { CreateWorkspaceMemberInput, UpdateWorkspaceMemberInput } from '../validators';
 
 @Injectable()
@@ -28,7 +28,7 @@ export class WorkspaceMemberService {
   }
 
   findById(id: string): Promise<WorkspaceMember> {
-    return this.workspaceMemberCache.rememberById(id, async () => {
+    return this.workspaceMemberCache.getOrSetById(id, async () => {
       const member = await this.workspaceMemberRepository.findById(id);
       if (!member) throw new NotFoundException('Workspace member not found');
       return member;

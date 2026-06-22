@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { catchError, throwError, timeout, TimeoutError } from 'rxjs';
 
 import { REQUEST_TIMEOUT_MS_KEY, SKIP_REQUEST_TIMEOUT_KEY } from '@/common/decorators';
-import { AppConfigService } from '@/core/config';
+import { AppConfigService } from '@/core/config/services/app-config.service';
 
 @Injectable()
 export class TimeoutInterceptor implements NestInterceptor {

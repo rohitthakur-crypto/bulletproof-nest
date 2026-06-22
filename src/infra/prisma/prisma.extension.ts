@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 
 import { Environment } from '@/common/enums';
-import type { AppConfigService } from '@/core/config';
+import type { AppConfigService } from '@/core/config/services/app-config.service';
 
 export function buildPrismaClientOptions(config: AppConfigService): Prisma.PrismaClientOptions {
   const isProduction = config.app.env === Environment.PRODUCTION;

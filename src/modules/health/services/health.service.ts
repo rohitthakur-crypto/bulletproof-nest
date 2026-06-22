@@ -19,7 +19,8 @@ export interface ServiceResult<T> {
   data: T;
   httpStatus: number;
 }
-import { AppLoggerService, type IAppLogger } from '@/core/logger';
+import type { IAppLogger } from '@/core/logger/logger.interface';
+import { AppLoggerService } from '@/core/logger/logger.service';
 
 @Injectable()
 export class HealthService {

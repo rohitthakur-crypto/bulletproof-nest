@@ -8,7 +8,7 @@ import {
   type AuthTokenResponse,
   type UserAuthResponse,
 } from '../dto';
-import { UserAuthGuard } from '../guards';
+import { UserAuthGuard } from '../guards/user-auth.guard';
 import type { AuthenticatedUser } from '../interfaces';
 import { UserAuthService } from '../services/user-auth.service';
 import { LoginDto, RefreshDto, RegisterDto } from '../validators';

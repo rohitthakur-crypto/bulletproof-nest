@@ -108,6 +108,13 @@ enum AutomationTriggerType {
   MANUAL
 }
 
+enum AutomationExecutionStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
 enum ConversationStatus {
   OPEN
   CLOSED
@@ -423,7 +430,7 @@ model AdminCredential {
 }
 
 //////////////////////////////////////////////////////
-//////////////// ADMIN ROLES ////////////////////////
+//////////////////// ADMIN ROLES /////////////////////
 //////////////////////////////////////////////////////
 
 model AdminRole {
@@ -443,10 +450,6 @@ model AdminRole {
 
   admins AdminRoleAssignment[]
 }
-
-//////////////////////////////////////////////////////
-//////////////// ADMIN PERMISSIONS ///////////////////
-//////////////////////////////////////////////////////
 
 model AdminPermission {
   id String @id @default(uuid()) @db.Uuid
@@ -485,11 +488,6 @@ model AdminRolePermission {
 
   @@unique([roleId, permissionId])
 }
-
-//////////////////////////////////////////////////////
-//////////////// ADMIN ROLE ASSIGNMENTS //////////////
-//////////////////////////////////////////////////////
-
 model AdminRoleAssignment {
   id String @id @default(uuid()) @db.Uuid
 
@@ -505,11 +503,6 @@ model AdminRoleAssignment {
 
   @@unique([adminId, roleId])
 }
-
-//////////////////////////////////////////////////////
-//////////////// ADMIN SESSIONS //////////////////////
-//////////////////////////////////////////////////////
-
 model AdminSession {
   id String @id @default(uuid()) @db.Uuid
 
@@ -562,11 +555,6 @@ model AdminSession {
   @@index([status])
   @@index([expiresAt])
 }
-
-//////////////////////////////////////////////////////
-//////////////// ADMIN REFRESH TOKENS ////////////////
-//////////////////////////////////////////////////////
-
 model AdminRefreshToken {
   id String @id @default(uuid()) @db.Uuid
 
@@ -594,10 +582,6 @@ model AdminRefreshToken {
   @@index([adminId])
   @@index([expiresAt])
 }
-
-//////////////////////////////////////////////////////
-//////////////// ADMIN PASSWORD RESET TOKENS ////////
-//////////////////////////////////////////////////////
 
 model AdminPasswordResetToken {
   id String @id @default(uuid()) @db.Uuid
@@ -631,18 +615,15 @@ model Workspace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members   WorkspaceMember[]
-  socialAccounts SocialAccount[]
-  automations Automation[]
-  webhookEvents WebhookEvent[]
+  members            WorkspaceMember[]
+  socialAccounts     SocialAccount[]
+  automations        Automation[]
+  automationExecutions AutomationExecution[]
+  webhookEvents      WebhookEvent[]
+  posts              SocialPost[]
 
   @@index([slug])
 }
-
-//////////////////////////////////////////////////////
-//////////////////// WORKSPACE MEMBERS ///////////////
-//////////////////////////////////////////////////////
-
 model WorkspaceMember {
   id           String @id @default(uuid()) @db.Uuid
 
@@ -659,6 +640,11 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([workspaceId])
 }
+
+
+//////////////////////////////////////////////////////
+//////////////////// SOCIAL ACCOUNTS /////////////////
+//////////////////////////////////////////////////////
 
 model SocialAccount {
   id String @id @default(uuid()) @db.Uuid
@@ -689,6 +675,8 @@ model SocialAccount {
   workspace  Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   credentials   SocialCredential?
+  posts         SocialPost[]
+  syncState     SocialPostSyncState?
   automations   Automation[]
   contacts      Contact[]
   conversations Conversation[]
@@ -698,11 +686,6 @@ model SocialAccount {
   @@unique([workspaceId, platform, platformAccountId])
   @@index([workspaceId])
 }
-
-//////////////////////////////////////////////////////
-//////////////////// SOCIAL CREDENTIALS //////////////
-//////////////////////////////////////////////////////
-
 model SocialCredential {
   id String @id @default(uuid()) @db.Uuid
 
@@ -719,6 +702,66 @@ model SocialCredential {
 
   @@index([socialAccountId])
   @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+//////////////////// SOCIAL POSTS ////////////////////
+//////////////////////////////////////////////////////
+
+model SocialPost {
+  id String @id @default(uuid()) @db.Uuid
+
+  workspaceId     String @db.Uuid
+  socialAccountId String @db.Uuid
+
+  platform       SocialPlatform
+  platformPostId String
+
+  caption      String?
+  mediaType    String?
+  mediaUrl     String?
+  thumbnailUrl String?
+  permalink    String?
+
+  publishedAt DateTime?
+  lastSeenAt  DateTime?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([socialAccountId, platformPostId])
+  @@index([socialAccountId, publishedAt])
+  @@index([workspaceId])
+  @@index([isDeleted])
+}
+
+//////////////////////////////////////////////////////
+/////////////// SOCIAL POST SYNC STATE ///////////////
+//////////////////////////////////////////////////////
+
+model SocialPostSyncState {
+  id String @id @default(uuid()) @db.Uuid
+
+  socialAccountId String @unique @db.Uuid
+
+  nextCursor String?
+
+  hasMore Boolean @default(true)
+
+  lastSyncedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 }
 
 //////////////////////////////////////////////////////
@@ -846,7 +889,10 @@ model Automation {
 
   executions AutomationExecution[]
 
+  @@index([workspaceId, status])
   @@index([socialAccountId, status])
+  @@index([createdById])
+  @@index([triggerType])
 }
 
 //////////////////////////////////////////////////////
@@ -856,20 +902,27 @@ model Automation {
 model AutomationExecution {
   id String @id @default(uuid()) @db.Uuid
 
-  workspaceId String @db.Uuid
+  workspaceId  String @db.Uuid
   automationId String @db.Uuid
 
   triggerPayload Json?
 
-  status String
+  status AutomationExecutionStatus @default(PENDING)
+
+  startedAt   DateTime?
+  completedAt DateTime?
 
   error String?
 
   executedAt DateTime @default(now())
 
+  workspace  Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId])
   @@index([automationId])
+  @@index([status])
+  @@index([executedAt])
 }
 
 //////////////////////////////////////////////////////
