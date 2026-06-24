@@ -24,7 +24,6 @@ export class HttpClientService {
   async request<TResponse, TBody = unknown>(
     options: HttpRequestOptions<TBody>,
   ): Promise<TResponse> {
-    console.log('options', options);
     try {
       const { data } = await this.client.request<TResponse>({
         url: options.url,
