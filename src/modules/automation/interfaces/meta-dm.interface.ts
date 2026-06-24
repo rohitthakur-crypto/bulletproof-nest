@@ -18,10 +18,10 @@ export interface MetaDmResponse {
   message_id: string;
 }
 
-export interface MetaDmPrivateReplyRequest {
-  message: string;
+export interface MetaDmCommentReplyRecipient {
+  comment_id: string;
 }
-
-export interface MetaDmPrivateReplyResponse {
-  id: string;
+export interface MetaDmCommentReplyRequest {
+  recipient: MetaDmCommentReplyRecipient;
+  message: MetaDmMessage;
 }

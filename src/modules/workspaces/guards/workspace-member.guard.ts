@@ -13,7 +13,7 @@ export class WorkspaceMemberGuard implements CanActivate {
     const workspaceId = resolveWorkspaceIdFromHeader(request);
 
     if (!workspaceId) {
-      throw new ForbiddenException('X-Workspace-Id header is required');
+      throw new ForbiddenException('workspace is required');
     }
 
     const member = await this.workspaceMemberService.requireMembership(

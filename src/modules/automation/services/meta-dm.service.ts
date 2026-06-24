@@ -2,12 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { SocialPlatform } from '@prisma/client';
 
 import { MetaMessageType } from '../enums';
-import {
-  MetaDmPrivateReplyRequest,
-  MetaDmPrivateReplyResponse,
-  MetaDmRequest,
-  MetaDmResponse,
-} from '../interfaces';
+import { MetaDmRequest, MetaDmResponse, MetaDmCommentReplyRequest } from '../interfaces';
 
 import { HttpMethod } from '@/common/enums';
 import { AppConfigService } from '@/core/config/services/app-config.service';
@@ -16,7 +11,6 @@ import { HttpClientService } from '@/infra/http/http-client.service';
 import {
   META_GRAPH_INSTAGRAM_MESSAGES_PATH,
   META_GRAPH_PAGE_MESSAGES_PATH,
-  META_GRAPH_COMMENT_PRIVATE_REPLIES_PATH,
 } from '@/modules/integrations/constants';
 import { SocialAccountsRepository } from '@/modules/social-accounts/repositories/social-accounts.repository';
 import { SocialCredentialsRepository } from '@/modules/social-accounts/repositories/social-credentials.repository';
@@ -83,11 +77,11 @@ export class MetaDmService {
     return response;
   }
 
-  public async sendPrivateReply(
+  public async sendCommentReply(
     socialAccountId: string,
     commentId: string,
     message: string,
-  ): Promise<MetaDmPrivateReplyResponse> {
+  ): Promise<MetaDmResponse> {
     const account = await this.socialAccountRepo.findById(socialAccountId);
 
     if (!account) {
@@ -102,27 +96,28 @@ export class MetaDmService {
 
     const accessToken = this.encryption.decrypt(credentials.accessToken);
 
-    const body: MetaDmPrivateReplyRequest = {
-      message: message,
+    const body: MetaDmCommentReplyRequest = {
+      recipient: { comment_id: commentId },
+      message: { text: message },
     };
 
     this.logger.debug(
       `Sending private reply via ${account.platform} to comment ${commentId} from account ${account.platformAccountId}`,
     );
 
-    const response = await this.http.request<MetaDmPrivateReplyResponse, MetaDmPrivateReplyRequest>(
-      {
-        method: HttpMethod.POST,
-        url: META_GRAPH_COMMENT_PRIVATE_REPLIES_PATH(commentId),
-        baseURL: this.getGraphBaseUrl(),
-        data: body,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    );
+    const endpoint = this.resolveMessagesEndpoint(account.platform, account.metaPageId ?? '');
 
-    this.logger.debug(`Private reply sent. id=${response.id}`);
+    const response = await this.http.request<MetaDmResponse, MetaDmCommentReplyRequest>({
+      method: HttpMethod.POST,
+      url: endpoint,
+      baseURL: this.getGraphBaseUrl(),
+      data: body,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    this.logger.debug(`Comment reply sent. message_id=${response.message_id}`);
 
     return response;
   }

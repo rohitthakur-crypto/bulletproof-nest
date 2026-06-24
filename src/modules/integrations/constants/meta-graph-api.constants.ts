@@ -18,6 +18,3 @@ export const META_GRAPH_PAGE_MESSAGES_PATH = (pageId: string) => `${pageId}/mess
 
 export const META_GRAPH_INSTAGRAM_MESSAGES_PATH = (igAccountId: string) =>
   `${igAccountId}/messages`;
-
-export const META_GRAPH_COMMENT_PRIVATE_REPLIES_PATH = (commentId: string) =>
-  `${commentId}/private_replies`;

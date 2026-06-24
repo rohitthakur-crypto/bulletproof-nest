@@ -133,7 +133,7 @@ export class MetaService {
   ): Promise<MetaAsset[]> {
     const session = await this.requireOAuthSession(user.sessionId, workspaceId);
     const response = await this.fetchSocialAccountAssets(session.accessToken);
-
+    console.log(response.data);
     return response.data;
   }
 

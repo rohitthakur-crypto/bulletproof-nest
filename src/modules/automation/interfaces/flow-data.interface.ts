@@ -9,3 +9,7 @@ export interface FlowData {
   nodes: FlowNode[];
   version?: string;
 }
+
+export interface SendMessageNodeConfig {
+  message: string;
+}
