@@ -21,7 +21,7 @@ import { AppConfigService } from '@/core/config/services/app-config.service';
 
           tls: config.redis.tls ? {} : undefined,
 
-          db: config.queue.db,
+          // db: config.queue.db,
         },
 
         prefix: config.queue.prefix,

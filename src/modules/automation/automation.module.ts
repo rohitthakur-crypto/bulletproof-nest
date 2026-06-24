@@ -1,7 +1,5 @@
-import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
-import { AUTOMATION_QUEUE_NAME } from './constants';
 import { AutomationsController, AutomationExecutionsController } from './controllers';
 import { AddTagHandler } from './handlers/actions/add-tag.handler';
 import { AiReplyHandler } from './handlers/actions/ai-reply.handler';
@@ -12,8 +10,6 @@ import { AnyCommentHandler } from './handlers/triggers/any-comment.handler';
 import { CommentKeywordHandler } from './handlers/triggers/comment-keyword.handler';
 import { DmReceivedHandler } from './handlers/triggers/dm-received.handler';
 import { MentionHandler } from './handlers/triggers/mention.handler';
-import { AutomationProcessor } from './jobs/automation.processor';
-import { AutomationQueueService } from './jobs/automation.queue';
 import { AutomationExecutionRepository } from './repositories/automation-execution.repository';
 import { AutomationRepository } from './repositories/automation.repository';
 import { AutomationExecutionService } from './services/automation-execution.service';
@@ -32,39 +28,25 @@ import { UserAuthModule } from '@/modules/user-auth';
 import { WorkspaceModule } from '@/modules/workspaces';
 
 @Module({
-  imports: [
-    BullModule.registerQueue({ name: AUTOMATION_QUEUE_NAME }),
-    UserAuthModule,
-    WorkspaceModule,
-    HttpModule,
-    EncryptionModule,
-  ],
+  imports: [UserAuthModule, WorkspaceModule, HttpModule, EncryptionModule],
   controllers: [AutomationsController, AutomationExecutionsController],
   providers: [
-    // Repositories
     AutomationRepository,
     AutomationExecutionRepository,
     SocialAccountsRepository,
     SocialCredentialsRepository,
 
-    // Trigger handlers
     CommentKeywordHandler,
     AnyCommentHandler,
     DmReceivedHandler,
     MentionHandler,
 
-    // Action handlers
     SendMessageHandler,
     DelayHandler,
     AiReplyHandler,
     AddTagHandler,
     WebhookActionHandler,
 
-    // Jobs
-    AutomationQueueService,
-    AutomationProcessor,
-
-    // Services
     AutomationService,
     AutomationQueryService,
     AutomationPublishService,
@@ -78,6 +60,7 @@ import { WorkspaceModule } from '@/modules/workspaces';
     AutomationQueryService,
     AutomationTriggerService,
     AutomationExecutionService,
+    AutomationWorkerService,
     MetaDmService,
   ],
 })

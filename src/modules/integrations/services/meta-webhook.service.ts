@@ -47,6 +47,7 @@ export class MetaWebhookService {
    * Returns immediately — all heavy processing is deferred to BullMQ workers.
    */
   async handleWebhook(body: MetaWebhookEventBody): Promise<void> {
+    console.log('handleWebhook', JSON.stringify(body, null, 2));
     const handler = this.handlers.find((h) => h.canHandle(body.object));
 
     if (!handler) {

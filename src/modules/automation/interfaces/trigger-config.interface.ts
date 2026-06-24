@@ -1,13 +1,15 @@
+import { KeywordMatchMode } from '../enums';
+
 export interface CommentKeywordTriggerConfig {
   socialPostId: string;
   keywords: string[];
-  matchMode?: 'ANY' | 'ALL';
+  matchMode?: KeywordMatchMode;
   caseSensitive?: boolean;
 }
 
 export interface DmKeywordTriggerConfig {
   keywords: string[];
-  matchMode?: 'ANY' | 'ALL';
+  matchMode?: KeywordMatchMode;
   caseSensitive?: boolean;
 }
 

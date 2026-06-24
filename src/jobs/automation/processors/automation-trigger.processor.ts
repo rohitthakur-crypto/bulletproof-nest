@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 
 import { AUTOMATION_JOBS, AUTOMATION_QUEUES } from '../constants';
-import type { CommentTriggerJob, ExecuteWorkflowJob } from '../interfaces';
+import { CommentTriggerJob, ExecuteWorkflowJob } from '../interfaces';
 import { WorkflowEngineService } from '../services/workflow-engine.service';
 
 @Processor(AUTOMATION_QUEUES.TRIGGER)

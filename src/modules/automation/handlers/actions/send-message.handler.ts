@@ -3,16 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { AutomationActionType } from '../../enums';
 import type { ActionHandler, AutomationContext, FlowNode } from '../../interfaces';
 import { MetaDmService } from '../../services/meta-dm.service';
+import { getEventDataString } from '../../utils';
 
 import { AppLoggerService } from '@/core/logger/logger.service';
-
-// ─── Node config shape ────────────────────────────────────────────────────────
 
 interface SendMessageNodeConfig {
   message: string;
 }
-
-// ─── Handler ──────────────────────────────────────────────────────────────────
 
 @Injectable()
 export class SendMessageHandler implements ActionHandler {
@@ -35,7 +32,18 @@ export class SendMessageHandler implements ActionHandler {
       return;
     }
 
-    const recipientId = context.triggerPayload['senderId'] as string | undefined;
+    const commentId = getEventDataString(context.triggerPayload, 'externalCommentId');
+
+    if (!commentId) {
+      await this.metaDmService.sendPrivateReply(context.socialAccountId, commentId, config.message);
+
+      this.logger.debug(
+        `[${context.executionId}] Private reply sent for comment ${commentId} in automation ${context.automationId}`,
+      );
+      return;
+    }
+
+    const recipientId = getEventDataString(context.triggerPayload, 'senderId');
 
     if (!recipientId) {
       this.logger.debug(`[${context.executionId}] No senderId in triggerPayload — cannot send DM`);

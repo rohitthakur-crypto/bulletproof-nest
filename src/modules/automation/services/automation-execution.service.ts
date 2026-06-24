@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { AutomationExecution } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import { AutomationExecutionStatus, Prisma } from '@prisma/client';
 
 import { AUTOMATION_ERRORS } from '../constants';
 import type { AutomationExecutionResponse, PaginatedExecutionsResponse } from '../dto/responses';
@@ -31,27 +31,27 @@ export class AutomationExecutionService {
       workspace: { connect: { id: workspaceId } },
       automation: { connect: { id: automationId } },
       triggerPayload: triggerPayload.eventData as unknown as Prisma.InputJsonValue,
-      status: 'PENDING',
+      status: AutomationExecutionStatus.PENDING,
     });
   }
 
   async markProcessing(executionId: string): Promise<AutomationExecution> {
     return this.executionRepo.update(executionId, {
-      status: 'PROCESSING',
+      status: AutomationExecutionStatus.PROCESSING,
       startedAt: new Date(),
     });
   }
 
   async markSuccess(executionId: string): Promise<AutomationExecution> {
     return this.executionRepo.update(executionId, {
-      status: 'SUCCESS',
+      status: AutomationExecutionStatus.SUCCESS,
       completedAt: new Date(),
     });
   }
 
   async markFailed(executionId: string, error: string): Promise<AutomationExecution> {
     return this.executionRepo.update(executionId, {
-      status: 'FAILED',
+      status: AutomationExecutionStatus.FAILED,
       completedAt: new Date(),
       error,
     });

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AutomationTriggerType } from '@prisma/client';
 
+import { KeywordMatchMode } from '../../enums';
 import type {
   TriggerHandler,
   TriggerPayload,
@@ -25,12 +26,12 @@ export class DmReceivedHandler implements TriggerHandler {
 
     const config = triggerConfig as DmKeywordTriggerConfig;
     const messageText = getEventDataString(payload.eventData, 'messageText');
-    const { keywords, matchMode = 'ANY', caseSensitive = false } = config;
+    const { keywords, matchMode = KeywordMatchMode.ANY, caseSensitive = false } = config;
 
     const text = caseSensitive ? messageText : messageText.toLowerCase();
     const normalizedKeywords = caseSensitive ? keywords : keywords.map((k) => k.toLowerCase());
 
-    if (matchMode === 'ALL') {
+    if (matchMode === KeywordMatchMode.ALL) {
       return normalizedKeywords.every((kw) => text.includes(kw));
     }
 

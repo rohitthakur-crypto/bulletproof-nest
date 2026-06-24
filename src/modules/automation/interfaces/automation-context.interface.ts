@@ -16,7 +16,7 @@ export interface TriggerPayload {
   externalEventId?: string;
 }
 
-export interface AutomationJobPayload {
+export interface CreatedExecution {
   executionId: string;
   automationId: string;
   workspaceId: string;

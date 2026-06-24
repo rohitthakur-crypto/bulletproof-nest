@@ -9,7 +9,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/src/main.js",
+    "start:prod": "node dist/main.js",
     "build": "rimraf dist && nest build && tsc-alias",
     "build:prod": "NODE_ENV=production pnpm run db:generate && pnpm run build",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { AutomationStatus } from '@prisma/client';
 
 import { AutomationActionType } from '../enums';
 import { AddTagHandler } from '../handlers/actions/add-tag.handler';
@@ -7,7 +8,7 @@ import { DelayHandler } from '../handlers/actions/delay.handler';
 import { SendMessageHandler } from '../handlers/actions/send-message.handler';
 import { WebhookActionHandler } from '../handlers/actions/webhook.handler';
 import type {
-  AutomationJobPayload,
+  CreatedExecution,
   AutomationContext,
   ActionHandler,
   FlowData,
@@ -46,7 +47,7 @@ export class AutomationWorkerService {
    * Called by AutomationProcessor inside the BullMQ worker.
    * Loads the automation, executes all flow nodes in order, and updates the execution status.
    */
-  async processExecution(payload: AutomationJobPayload): Promise<void> {
+  async processExecution(payload: CreatedExecution): Promise<void> {
     const { executionId, automationId, workspaceId } = payload;
 
     await this.executionService.markProcessing(executionId);
@@ -58,7 +59,7 @@ export class AutomationWorkerService {
         throw new Error(`Automation ${automationId} not found`);
       }
 
-      if (automation.status !== 'ACTIVE') {
+      if (automation.status !== AutomationStatus.ACTIVE) {
         this.logger.warn(
           `Automation ${automationId} is no longer ACTIVE (status: ${automation.status}). Skipping execution ${executionId}.`,
         );

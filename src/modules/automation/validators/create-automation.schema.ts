@@ -6,6 +6,7 @@ import {
   AUTOMATION_KEYWORD_MAX_COUNT,
   AUTOMATION_KEYWORD_MAX_LENGTH,
 } from '../constants';
+import { KeywordMatchMode } from '../enums';
 
 // ─── Sub-schemas ──────────────────────────────────────────────────────────────
 
@@ -26,7 +27,7 @@ const keywordListSchema = z
   .min(1)
   .max(AUTOMATION_KEYWORD_MAX_COUNT);
 
-const matchModeSchema = z.enum(['ANY', 'ALL']).default('ANY');
+const matchModeSchema = z.enum(KeywordMatchMode).default(KeywordMatchMode.ANY);
 
 // ─── Trigger config discriminated union ───────────────────────────────────────
 

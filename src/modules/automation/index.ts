@@ -10,7 +10,7 @@ export type {
 
 export type {
   TriggerPayload,
-  AutomationJobPayload,
+  CreatedExecution,
   AutomationContext,
   FlowNode,
   FlowData,

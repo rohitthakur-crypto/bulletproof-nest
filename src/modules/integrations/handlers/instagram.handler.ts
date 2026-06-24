@@ -15,7 +15,7 @@ import type {
 } from '../interfaces';
 
 import { AppLoggerService } from '@/core/logger/logger.service';
-import { AutomationTriggerProducer } from '@/jobs/automation/producers/automation-trigger.producer';
+import { AutomationProducer } from '@/jobs/automation/producers/automation.producer';
 import { SocialAccountsService } from '@/modules/social-accounts/services/social-accounts.service';
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ import { SocialAccountsService } from '@/modules/social-accounts/services/social
 export class InstagramHandler implements PlatformWebhookHandler {
   constructor(
     private readonly socialAccountService: SocialAccountsService,
-    private readonly triggerProducer: AutomationTriggerProducer,
+    private readonly triggerProducer: AutomationProducer,
     private readonly logger: AppLoggerService,
   ) {}
 

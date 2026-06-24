@@ -41,7 +41,6 @@ export class HttpClientService {
 
       return data;
     } catch (error) {
-      console.log('error', error);
       this.logRequestError(error, options);
       throw error;
     }

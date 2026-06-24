@@ -3,9 +3,9 @@ import { Module } from '@nestjs/common';
 
 import { AUTOMATION_QUEUES } from './constants';
 import { AutomationActionProcessor } from './processors/automation-action.processor';
+import { AutomationExecutionProcessor } from './processors/automation-execution.processor';
 import { AutomationTriggerProcessor } from './processors/automation-trigger.processor';
-import { AutomationActionProducer } from './producers/automation-action.producer';
-import { AutomationTriggerProducer } from './producers/automation-trigger.producer';
+import { AutomationProducer } from './producers/automation.producer';
 import { ActionExecutorService } from './services/action-executor.service';
 import { WorkflowEngineService } from './services/workflow-engine.service';
 
@@ -15,20 +15,21 @@ import { AutomationModule } from '@/modules/automation';
   imports: [
     BullModule.registerQueue(
       { name: AUTOMATION_QUEUES.TRIGGER },
+      { name: AUTOMATION_QUEUES.EXECUTION },
       { name: AUTOMATION_QUEUES.ACTION },
     ),
     AutomationModule,
   ],
 
   providers: [
-    AutomationTriggerProducer,
-    AutomationActionProducer,
+    AutomationProducer,
     AutomationTriggerProcessor,
+    AutomationExecutionProcessor,
     AutomationActionProcessor,
     WorkflowEngineService,
     ActionExecutorService,
   ],
 
-  exports: [AutomationTriggerProducer, AutomationActionProducer],
+  exports: [AutomationProducer],
 })
 export class AutomationJobModule {}
